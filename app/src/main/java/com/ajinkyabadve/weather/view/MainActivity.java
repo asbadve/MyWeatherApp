@@ -34,8 +34,6 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
     protected void onStart() {
         super.onStart();
         realm = Realm.getDefaultInstance();
-        String[] columnToBeSort = {"releaseDate", "voteAverage"};
-        Sort[] sortOrders = {Sort.ASCENDING, Sort.DESCENDING};
         long currentTimeMillis = System.currentTimeMillis();
         Date date = new Date(currentTimeMillis);
         resultRealmResults = realm.where(CityRealm.class).findAllAsync();
