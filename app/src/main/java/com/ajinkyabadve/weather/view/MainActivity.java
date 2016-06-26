@@ -34,8 +34,6 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
     protected void onStart() {
         super.onStart();
         realm = Realm.getDefaultInstance();
-        long currentTimeMillis = System.currentTimeMillis();
-        Date date = new Date(currentTimeMillis);
         resultRealmResults = realm.where(CityRealm.class).findAllAsync();
         resultRealmResults.addChangeListener(this);
     }
