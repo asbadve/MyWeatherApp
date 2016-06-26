@@ -1,30 +1,60 @@
 package com.ajinkyabadve.weather.view;
 
 import android.databinding.DataBindingUtil;
-import android.databinding.ViewDataBinding;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.ajinkyabadve.weather.R;
-import com.ajinkyabadve.weather.databinding.ActivityMainBinding;
+import com.ajinkyabadve.Realm.R;
+import com.ajinkyabadve.Realm.databinding.ActivityMainBinding;
+import com.ajinkyabadve.weather.model.realm.CityRealm;
 import com.ajinkyabadve.weather.viewmodel.MainViewModel;
+
+import java.util.Date;
+
+import io.realm.Realm;
+import io.realm.RealmChangeListener;
+import io.realm.RealmResults;
+import io.realm.Sort;
 
 /**
  * test
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements RealmChangeListener<RealmResults<CityRealm>> {
+    private static final String TAG = MainActivity.class.getSimpleName();
     private MainViewModel mainViewModel;
-    ActivityMainBinding activityMainBinding;
+    private ActivityMainBinding activityMainBinding;
 
+    Realm realm;
+    private RealmResults<CityRealm> resultRealmResults;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        realm = Realm.getDefaultInstance();
+        String[] columnToBeSort = {"releaseDate", "voteAverage"};
+        Sort[] sortOrders = {Sort.ASCENDING, Sort.DESCENDING};
+        long currentTimeMillis = System.currentTimeMillis();
+        Date date = new Date(currentTimeMillis);
+        resultRealmResults = realm.where(CityRealm.class).findAllAsync();
+        resultRealmResults.addChangeListener(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        resultRealmResults.removeChangeListener(this);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        mainViewModel = new MainViewModel();
+        mainViewModel = new MainViewModel(MainActivity.this);
         activityMainBinding.setViewModel(mainViewModel);
+        setSupportActionBar(activityMainBinding.toolbar);
 //        setContentView(R.layout.activity_main);
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
@@ -59,5 +89,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onChange(RealmResults<CityRealm> element) {
+        Log.d(TAG, "onChange() called with: " + "element = [" + element + "]");
+        CityRealm df = element.get(0);
     }
 }

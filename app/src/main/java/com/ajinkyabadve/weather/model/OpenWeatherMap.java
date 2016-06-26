@@ -21,7 +21,7 @@ public class OpenWeatherMap {
     private Integer cnt;
     @SerializedName("list")
     @Expose
-    private java.util.List<com.ajinkyabadve.weather.model.List> list = new ArrayList<com.ajinkyabadve.weather.model.List>();
+    private java.util.List<List> list = new ArrayList<com.ajinkyabadve.weather.model.List>();
 
     /**
      * 
@@ -113,4 +113,14 @@ public class OpenWeatherMap {
         this.list = list;
     }
 
+    @Override
+    public String toString() {
+        return "OpenWeatherMap{" +
+                "city=" + city +
+                ", cod='" + cod + '\'' +
+                ", message=" + message +
+                ", cnt=" + cnt +
+                ", list=" + list +
+                '}';
+    }
 }

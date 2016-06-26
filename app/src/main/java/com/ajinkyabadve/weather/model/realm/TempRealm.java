@@ -1,133 +1,99 @@
 
-package com.ajinkyabadve.weather.model;
+package com.ajinkyabadve.weather.model.realm;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
-public class Temp {
+public class TempRealm extends RealmObject {
+    @PrimaryKey
+    private Integer id;
 
-    @SerializedName("day")
-    @Expose
     private Double day;
-    @SerializedName("min")
-    @Expose
     private Double min;
-    @SerializedName("max")
-    @Expose
     private Double max;
-    @SerializedName("night")
-    @Expose
     private Double night;
-    @SerializedName("eve")
-    @Expose
     private Double eve;
-    @SerializedName("morn")
-    @Expose
     private Double morn;
 
     /**
-     * 
-     * @return
-     *     The day
+     * @return The day
      */
     public Double getDay() {
         return day;
     }
 
     /**
-     * 
-     * @param day
-     *     The day
+     * @param day The day
      */
     public void setDay(Double day) {
         this.day = day;
     }
 
     /**
-     * 
-     * @return
-     *     The min
+     * @return The min
      */
     public Double getMin() {
         return min;
     }
 
     /**
-     * 
-     * @param min
-     *     The min
+     * @param min The min
      */
     public void setMin(Double min) {
         this.min = min;
     }
 
     /**
-     * 
-     * @return
-     *     The max
+     * @return The max
      */
     public Double getMax() {
         return max;
     }
 
     /**
-     * 
-     * @param max
-     *     The max
+     * @param max The max
      */
     public void setMax(Double max) {
         this.max = max;
     }
 
     /**
-     * 
-     * @return
-     *     The night
+     * @return The night
      */
     public Double getNight() {
         return night;
     }
 
     /**
-     * 
-     * @param night
-     *     The night
+     * @param night The night
      */
     public void setNight(Double night) {
         this.night = night;
     }
 
     /**
-     * 
-     * @return
-     *     The eve
+     * @return The eve
      */
     public Double getEve() {
         return eve;
     }
 
     /**
-     * 
-     * @param eve
-     *     The eve
+     * @param eve The eve
      */
     public void setEve(Double eve) {
         this.eve = eve;
     }
 
     /**
-     * 
-     * @return
-     *     The morn
+     * @return The morn
      */
     public Double getMorn() {
         return morn;
     }
 
     /**
-     * 
-     * @param morn
-     *     The morn
+     * @param morn The morn
      */
     public void setMorn(Double morn) {
         this.morn = morn;
@@ -135,7 +101,7 @@ public class Temp {
 
     @Override
     public String toString() {
-        return "Temp{" +
+        return "TempRealm{" +
                 "day=" + day +
                 ", min=" + min +
                 ", max=" + max +
@@ -143,5 +109,13 @@ public class Temp {
                 ", eve=" + eve +
                 ", morn=" + morn +
                 '}';
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }

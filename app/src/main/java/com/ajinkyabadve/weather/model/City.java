@@ -112,4 +112,15 @@ public class City {
         this.population = population;
     }
 
+
+    @Override
+    public String toString() {
+        return "City{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", coord=" + coord +
+                ", country='" + country + '\'' +
+                ", population=" + population +
+                '}';
+    }
 }

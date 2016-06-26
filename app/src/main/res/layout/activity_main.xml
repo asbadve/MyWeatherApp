@@ -2,12 +2,13 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
+
     <data>
+
         <variable
             name="viewModel"
             type="com.ajinkyabadve.weather.viewmodel.MainViewModel" />
 
-        <variable name="presenter" type="com.ajinkyabadve.weather.viewmodel.MainViewModel"></variable>
     </data>
 
     <android.support.design.widget.CoordinatorLayout
@@ -45,10 +46,10 @@
             tools:showIn="@layout/activity_main">
 
             <TextView
-                android:onClick="@{viewModel.onClickSearch}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Hello World!" />
+                android:text="@{viewModel.infoMessage}"
+                app:visibility="@{viewModel.helloVisibility}" />
         </RelativeLayout>
 
         <android.support.design.widget.FloatingActionButton

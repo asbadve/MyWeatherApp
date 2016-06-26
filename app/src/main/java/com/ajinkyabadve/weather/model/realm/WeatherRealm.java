@@ -1,22 +1,16 @@
 
-package com.ajinkyabadve.weather.model;
+package com.ajinkyabadve.weather.model.realm;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
-public class Weather {
+public class WeatherRealm extends RealmObject {
+    @PrimaryKey
+    private Integer primaryKeyId;
 
-    @SerializedName("id")
-    @Expose
     private Integer id;
-    @SerializedName("main")
-    @Expose
     private String main;
-    @SerializedName("description")
-    @Expose
     private String description;
-    @SerializedName("icon")
-    @Expose
     private String icon;
 
     /**
@@ -78,11 +72,19 @@ public class Weather {
 
     @Override
     public String toString() {
-        return "Weather{" +
+        return "WeatherRealm{" +
                 "id=" + id +
                 ", main='" + main + '\'' +
                 ", description='" + description + '\'' +
                 ", icon='" + icon + '\'' +
                 '}';
+    }
+
+    public Integer getPrimaryKeyId() {
+        return primaryKeyId;
+    }
+
+    public void setPrimaryKeyId(Integer primaryKeyId) {
+        this.primaryKeyId = primaryKeyId;
     }
 }

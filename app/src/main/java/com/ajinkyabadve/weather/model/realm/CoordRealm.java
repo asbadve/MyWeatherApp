@@ -1,16 +1,15 @@
 
-package com.ajinkyabadve.weather.model;
+package com.ajinkyabadve.weather.model.realm;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
-public class Coord {
+public class CoordRealm extends RealmObject {
 
-    @SerializedName("lon")
-    @Expose
+    @PrimaryKey
+    private Integer id;
+
     private Double lon;
-    @SerializedName("lat")
-    @Expose
     private Double lat;
 
     /**
@@ -51,9 +50,17 @@ public class Coord {
 
     @Override
     public String toString() {
-        return "Coord{" +
+        return "CoordRealm{" +
                 "lon=" + lon +
                 ", lat=" + lat +
                 '}';
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }

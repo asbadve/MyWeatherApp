@@ -198,4 +198,18 @@ public class List {
         this.rain = rain;
     }
 
+    @Override
+    public String toString() {
+        return "List{" +
+                "dt=" + dt +
+                ", temp=" + temp +
+                ", pressure=" + pressure +
+                ", humidity=" + humidity +
+                ", weather=" + weather +
+                ", speed=" + speed +
+                ", deg=" + deg +
+                ", clouds=" + clouds +
+                ", rain=" + rain +
+                '}';
+    }
 }

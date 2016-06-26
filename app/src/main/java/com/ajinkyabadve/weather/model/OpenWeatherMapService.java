@@ -1,12 +1,15 @@
 package com.ajinkyabadve.weather.model;
 
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
+import retrofit2.http.QueryMap;
 import rx.Observable;
 
 /**
@@ -14,10 +17,11 @@ import rx.Observable;
  */
 public interface OpenWeatherMapService {
     //http://api.openweathermap.org/data/2.5/forecast/daily?q=Pune&cnt=14&APPID=8be06227a313736007f84b540e2aed5f
-    public static final String BASE_URL = "http://api.openweathermap.org/data/2.5/forecast/daily?";
+    public static final String BASE_URL = "http://api.openweathermap.org/data/2.5/forecast/";
 
-    @GET("q={city}&cnt=14&APPID=8be06227a313736007f84b540e2aed5f")
-    Observable<OpenWeatherMap> getWeatherForeCast(@Path("city") String city);
+    //?q={city}&cnt=14&APPID=8be06227a313736007f84b540e2aed5f
+    @GET("daily")
+    Observable<OpenWeatherMap> getWeatherForeCast(@Query("q") String city,@QueryMap Map<String, String> options);
 
 
     class Factory {
