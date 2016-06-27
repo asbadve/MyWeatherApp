@@ -1,8 +1,6 @@
-package com.ajinkyabadve.weather.viewmodel;
+package com.ajinkyabadve.weather.JobSchedular;
 
-import android.content.Context;
-import android.databinding.ObservableField;
-import android.databinding.ObservableInt;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.ajinkyabadve.weather.WeatherApplication;
@@ -10,6 +8,8 @@ import com.ajinkyabadve.weather.model.OpenWeatherMap;
 import com.ajinkyabadve.weather.model.OpenWeatherMapService;
 import com.ajinkyabadve.weather.model.realm.CityRealm;
 import com.ajinkyabadve.weather.model.realm.RealmUtil;
+import com.evernote.android.job.Job;
+import com.evernote.android.job.JobRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,46 +20,40 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
 /**
- * Created by Ajinkya on 26-06-2016.
+ * Created by Ajinkya on 27/06/2016.
  */
-public class MainViewModel implements ViewModel {
-
-    private static final String TAG = MainViewModel.class.getSimpleName();
-    public ObservableInt helloVisibility;
-    public ObservableField<String> infoMessage;
+public class WeatherExactJob extends Job {
+    public static final String TAG = "WeatherExactJob";
     private Subscription subscription;
-    private Context context;
+    Result result;
 
+    @NonNull
+    @Override
+    protected Result onRunJob(Params params) {
+        Log.d(TAG, "onRunJob() called with: " + "params = [" + params + "]");
 
-    public MainViewModel(Context context) {
-        this.context = context;
-        infoMessage = new ObservableField<>("hello world");
-        //loadWeather();
-    }
-
-    private void loadWeather() {
         if (subscription != null && !subscription.isUnsubscribed()) subscription.unsubscribe();
-        WeatherApplication weatherApplication = WeatherApplication.get(context);
+        WeatherApplication weatherApplication = WeatherApplication.get(getContext());
         OpenWeatherMapService openWeatherMapService = weatherApplication.getOpenWeatherMapService();
         Map<String, String> queryParam = new HashMap<>();
         queryParam.put("cnt", "14");
         queryParam.put("APPID", "8be06227a313736007f84b540e2aed5f");
 
-        subscription = openWeatherMapService.getWeatherForeCast("Pune", queryParam)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(weatherApplication.defaultSubscribeScheduler())
+        subscription = openWeatherMapService.getWeatherForeCast("Mumbai", queryParam)
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribeOn(weatherApplication.defaultSubscribeScheduler())
                 .subscribe(new Subscriber<OpenWeatherMap>() {
                     @Override
                     public void onCompleted() {
-
                         Log.d(TAG, "onCompleted() called with: " + "");
+                        result = Result.SUCCESS;
 
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         Log.d(TAG, "onError() called with: " + "e = [" + e + "]");
-
+                        result = Result.FAILURE;
                     }
 
                     @Override
@@ -74,13 +68,15 @@ public class MainViewModel implements ViewModel {
                     }
                 });
 
-
+        if (result == Result.FAILURE) {
+            result = Result.RESCHEDULE;
+        } else if (result == Result.SUCCESS) {
+            int jobId = new JobRequest.Builder(WeatherPeriodicJob.TAG)
+                    .setPeriodic(60_000L)
+                    .setPersisted(true)
+                    .build()
+                    .schedule();
+        }
+        return result;
     }
-
-    @Override
-    public void onDestroy() {
-
-    }
-
-
 }

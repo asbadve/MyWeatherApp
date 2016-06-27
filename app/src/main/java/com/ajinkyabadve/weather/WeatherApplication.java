@@ -3,7 +3,14 @@ package com.ajinkyabadve.weather;
 import android.app.Application;
 import android.content.Context;
 
+import com.ajinkyabadve.weather.JobSchedular.WeatherExactJob;
+import com.ajinkyabadve.weather.JobSchedular.WeatherJobCreator;
+import com.ajinkyabadve.weather.JobSchedular.WeatherPeriodicJob;
 import com.ajinkyabadve.weather.model.OpenWeatherMapService;
+import com.evernote.android.job.JobManager;
+import com.evernote.android.job.JobRequest;
+
+import java.util.Set;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -14,15 +21,34 @@ import rx.schedulers.Schedulers;
  * Created by Ajinkya on 26-06-2016.
  */
 public class WeatherApplication extends Application {
+    public Realm realm;
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this)
                 .build();
 
         Realm.setDefaultConfiguration(realmConfiguration);
+
+        JobManager.create(this).addJobCreator(new WeatherJobCreator());
+
+        realm = Realm.getDefaultInstance();
+
+        Set<JobRequest> allJobRequests = JobManager.instance().getAllJobRequests();
+        if (allJobRequests.size() == 0) {
+            int jobId = new JobRequest.Builder(WeatherExactJob.TAG)
+                    .setExact(10_000L)
+                    .setPersisted(true)
+                    .build()
+                    .schedule();
+        }
+
+
     }
+
 
     private OpenWeatherMapService openWeatherMapService;
     private Scheduler defaultSubscribeScheduler;
@@ -54,4 +80,5 @@ public class WeatherApplication extends Application {
     public void setDefaultSubscribeScheduler(Scheduler scheduler) {
         this.defaultSubscribeScheduler = scheduler;
     }
+
 }

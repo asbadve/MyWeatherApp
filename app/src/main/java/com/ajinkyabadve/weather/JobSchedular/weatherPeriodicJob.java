@@ -1,8 +1,6 @@
-package com.ajinkyabadve.weather.viewmodel;
+package com.ajinkyabadve.weather.JobSchedular;
 
-import android.content.Context;
-import android.databinding.ObservableField;
-import android.databinding.ObservableInt;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.ajinkyabadve.weather.WeatherApplication;
@@ -10,6 +8,9 @@ import com.ajinkyabadve.weather.model.OpenWeatherMap;
 import com.ajinkyabadve.weather.model.OpenWeatherMapService;
 import com.ajinkyabadve.weather.model.realm.CityRealm;
 import com.ajinkyabadve.weather.model.realm.RealmUtil;
+import com.evernote.android.job.Job;
+import com.evernote.android.job.JobManager;
+import com.evernote.android.job.JobRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,41 +18,36 @@ import java.util.Map;
 import io.realm.Realm;
 import rx.Subscriber;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
 
 /**
- * Created by Ajinkya on 26-06-2016.
+ * Created by Ajinkya on 27/06/2016.
  */
-public class MainViewModel implements ViewModel {
+public class WeatherPeriodicJob extends Job {
 
-    private static final String TAG = MainViewModel.class.getSimpleName();
-    public ObservableInt helloVisibility;
-    public ObservableField<String> infoMessage;
+
+    public static final String TAG = "WeatherPeriodicJob";
     private Subscription subscription;
-    private Context context;
 
-
-    public MainViewModel(Context context) {
-        this.context = context;
-        infoMessage = new ObservableField<>("hello world");
-        //loadWeather();
+    public WeatherPeriodicJob() {
     }
 
-    private void loadWeather() {
+    @NonNull
+    @Override
+    protected Result onRunJob(Params params) {
+        Log.d(TAG, "onRunJob() called with: " + "params = [" + params + "]");
         if (subscription != null && !subscription.isUnsubscribed()) subscription.unsubscribe();
-        WeatherApplication weatherApplication = WeatherApplication.get(context);
+        WeatherApplication weatherApplication = WeatherApplication.get(getContext());
         OpenWeatherMapService openWeatherMapService = weatherApplication.getOpenWeatherMapService();
         Map<String, String> queryParam = new HashMap<>();
         queryParam.put("cnt", "14");
         queryParam.put("APPID", "8be06227a313736007f84b540e2aed5f");
 
-        subscription = openWeatherMapService.getWeatherForeCast("Pune", queryParam)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(weatherApplication.defaultSubscribeScheduler())
+        subscription = openWeatherMapService.getWeatherForeCast("Mumbai", queryParam)
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribeOn(weatherApplication.defaultSubscribeScheduler())
                 .subscribe(new Subscriber<OpenWeatherMap>() {
                     @Override
                     public void onCompleted() {
-
                         Log.d(TAG, "onCompleted() called with: " + "");
 
                     }
@@ -59,7 +55,6 @@ public class MainViewModel implements ViewModel {
                     @Override
                     public void onError(Throwable e) {
                         Log.d(TAG, "onError() called with: " + "e = [" + e + "]");
-
                     }
 
                     @Override
@@ -75,12 +70,34 @@ public class MainViewModel implements ViewModel {
                 });
 
 
+        return Result.SUCCESS;
     }
 
-    @Override
-    public void onDestroy() {
-
+    public static void scheduleJob() {
+        new JobRequest.Builder(WeatherPeriodicJob.TAG)
+                .setExecutionWindow(30_000L, 40_000L)
+                .build()
+                .schedule();
     }
 
+    private int schedulePeriodicJob() {
+        int jobId = new JobRequest.Builder(WeatherPeriodicJob.TAG)
+                .setPeriodic(60_000L)
+                .setPersisted(true)
+                .build()
+                .schedule();
+        return jobId;
+    }
 
+    private void scheduleExactJob() {
+        int jobId = new JobRequest.Builder(WeatherPeriodicJob.TAG)
+                .setExact(10_000L)
+                .setPersisted(true)
+                .build()
+                .schedule();
+    }
+
+    private void cancelJob(int jobId) {
+        JobManager.instance().cancel(jobId);
+    }
 }
