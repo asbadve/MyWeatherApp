@@ -12,12 +12,9 @@ import com.ajinkyabadve.Realm.databinding.ActivityMainBinding;
 import com.ajinkyabadve.weather.model.realm.CityRealm;
 import com.ajinkyabadve.weather.viewmodel.MainViewModel;
 
-import java.util.Date;
-
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
-import io.realm.Sort;
 
 /**
  * test

@@ -5,7 +5,6 @@ import android.content.Context;
 
 import com.ajinkyabadve.weather.JobSchedular.WeatherExactJob;
 import com.ajinkyabadve.weather.JobSchedular.WeatherJobCreator;
-import com.ajinkyabadve.weather.JobSchedular.WeatherPeriodicJob;
 import com.ajinkyabadve.weather.model.OpenWeatherMapService;
 import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
@@ -44,6 +43,8 @@ public class WeatherApplication extends Application {
                     .setPersisted(true)
                     .build()
                     .schedule();
+        } else {
+            JobManager.instance().cancelAll();//just remove it after production
         }
 
 

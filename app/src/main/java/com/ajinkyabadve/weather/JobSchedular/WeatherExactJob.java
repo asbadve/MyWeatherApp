@@ -17,7 +17,6 @@ import java.util.Map;
 import io.realm.Realm;
 import rx.Subscriber;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
 
 /**
  * Created by Ajinkya on 27/06/2016.
@@ -39,7 +38,7 @@ public class WeatherExactJob extends Job {
         queryParam.put("cnt", "14");
         queryParam.put("APPID", "8be06227a313736007f84b540e2aed5f");
 
-        subscription = openWeatherMapService.getWeatherForeCast("Mumbai", queryParam)
+        subscription = openWeatherMapService.getWeatherForeCastByCity("Mumbai", queryParam)
 //                .observeOn(AndroidSchedulers.mainThread())
 //                .subscribeOn(weatherApplication.defaultSubscribeScheduler())
                 .subscribe(new Subscriber<OpenWeatherMap>() {
