@@ -6,7 +6,7 @@ import io.realm.annotations.PrimaryKey;
 
 public class TempRealm extends RealmObject {
     @PrimaryKey
-    private Integer id;
+    private String id;//combination of dt and city id
 
     private Double day;
     private Double min;
@@ -102,7 +102,8 @@ public class TempRealm extends RealmObject {
     @Override
     public String toString() {
         return "TempRealm{" +
-                "day=" + day +
+                "id='" + id + '\'' +
+                ", day=" + day +
                 ", min=" + min +
                 ", max=" + max +
                 ", night=" + night +
@@ -111,11 +112,11 @@ public class TempRealm extends RealmObject {
                 '}';
     }
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 }

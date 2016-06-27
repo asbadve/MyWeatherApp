@@ -46,7 +46,7 @@ public class MainViewModel implements ViewModel {
         queryParam.put("cnt", "14");
         queryParam.put("APPID", "8be06227a313736007f84b540e2aed5f");
 
-        subscription = openWeatherMapService.getWeatherForeCast("Mumbai", queryParam)
+        subscription = openWeatherMapService.getWeatherForeCast("Pune", queryParam)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(weatherApplication.defaultSubscribeScheduler())
                 .subscribe(new Subscriber<OpenWeatherMap>() {

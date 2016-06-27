@@ -7,7 +7,7 @@ import io.realm.annotations.PrimaryKey;
 
 public class ListRealm extends RealmObject {
 
-    @PrimaryKey
+
     private Integer dt;
     private TempRealm tempRealm;
     private Double pressure;
@@ -17,6 +17,9 @@ public class ListRealm extends RealmObject {
     private Integer deg;
     private Integer clouds;
     private Double rain;
+    @PrimaryKey
+    private String dtAndCityId;
+
 
     /**
      * @return The dt
@@ -156,6 +159,15 @@ public class ListRealm extends RealmObject {
                 ", deg=" + deg +
                 ", clouds=" + clouds +
                 ", rain=" + rain +
+                ", dtAndCityId=" + dtAndCityId +
                 '}';
+    }
+
+    public String getDtAndCityId() {
+        return dtAndCityId;
+    }
+
+    public void setDtAndCityId(String dtAndCityId) {
+        this.dtAndCityId = dtAndCityId;
     }
 }

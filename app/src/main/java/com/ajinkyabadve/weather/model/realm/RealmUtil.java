@@ -25,6 +25,7 @@ public class RealmUtil {
         CoordRealm coordRealm = new CoordRealm();
         coordRealm.setLat(coord.getLat());
         coordRealm.setLon(coord.getLon());
+        coordRealm.setId(city.getId());//explicit given proimary key
 
         cityRealm.setCountry(city.getCountry());
         cityRealm.setPopulation(city.getPopulation());
@@ -32,20 +33,21 @@ public class RealmUtil {
         cityRealm.setMessage(openWeatherMap.getMessage());
         cityRealm.setCnt(openWeatherMap.getCnt());
         cityRealm.setCoordRealm(coordRealm);
-        cityRealm.setListRealm(getListRealm(openWeatherMap.getList()));
+        cityRealm.setListRealm(getListRealm(openWeatherMap.getList(), cityRealm));
         return cityRealm;
     }
 
-    private static RealmList<ListRealm> getListRealm(java.util.List<List> listFromOpenWeatherMap) {
+    private static RealmList<ListRealm> getListRealm(java.util.List<List> listFromOpenWeatherMap, CityRealm cityRealm) {
         RealmList<ListRealm> listRealmRealmList = new RealmList<ListRealm>();
         for (int i = 0; i < listFromOpenWeatherMap.size(); i++) {
             List listObjectFromOpenWM = listFromOpenWeatherMap.get(i);
             ListRealm listRealm = new ListRealm();
 
-
+            listRealm.setDtAndCityId(listObjectFromOpenWM.getDt() + "," + cityRealm.getId());
             listRealm.setDt(listObjectFromOpenWM.getDt());
             Temp temp = listObjectFromOpenWM.getTemp();
             TempRealm tempRealm = new TempRealm();
+            tempRealm.setId(listObjectFromOpenWM.getDt() + "," + cityRealm.getId());
             tempRealm.setDay(temp.getDay());
             tempRealm.setMin(temp.getMin());
             tempRealm.setMax(temp.getMax());
@@ -61,6 +63,7 @@ public class RealmUtil {
             for (int i1 = 0; i1 < listWeather.size(); i1++) {
                 Weather weather = listWeather.get(i1);
                 WeatherRealm weatherRealm = new WeatherRealm();
+                weatherRealm.setPrimaryKeyId(listObjectFromOpenWM.getDt() + "," + cityRealm.getId());
                 weatherRealm.setId(weather.getId());
                 weatherRealm.setMain(weather.getMain());
                 weatherRealm.setDescription(weather.getDescription());

@@ -90,6 +90,8 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
     @Override
     public void onChange(RealmResults<CityRealm> element) {
         Log.d(TAG, "onChange() called with: " + "element = [" + element + "]");
-        CityRealm df = element.get(0);
+        if (element.size() > 0) {
+            CityRealm df = element.get(0);
+        }
     }
 }

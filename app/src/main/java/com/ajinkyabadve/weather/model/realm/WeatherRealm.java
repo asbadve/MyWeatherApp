@@ -6,7 +6,7 @@ import io.realm.annotations.PrimaryKey;
 
 public class WeatherRealm extends RealmObject {
     @PrimaryKey
-    private Integer primaryKeyId;
+    private String primaryKeyId;
 
     private Integer id;
     private String main;
@@ -80,11 +80,11 @@ public class WeatherRealm extends RealmObject {
                 '}';
     }
 
-    public Integer getPrimaryKeyId() {
+    public String getPrimaryKeyId() {
         return primaryKeyId;
     }
 
-    public void setPrimaryKeyId(Integer primaryKeyId) {
+    public void setPrimaryKeyId(String primaryKeyId) {
         this.primaryKeyId = primaryKeyId;
     }
 }
