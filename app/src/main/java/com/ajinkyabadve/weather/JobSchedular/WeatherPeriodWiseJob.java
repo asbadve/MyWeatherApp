@@ -46,33 +46,6 @@ public class WeatherPeriodWiseJob extends Job {
         queryParam.put("cnt", "14");
         queryParam.put("APPID", "8be06227a313736007f84b540e2aed5f");
 
-        subscription = openWeatherMapService.getWeatherForeCastByCity("Mumbai", queryParam)
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribeOn(weatherApplication.defaultSubscribeScheduler())
-
-                .subscribe(new Subscriber<OpenWeatherMap>() {
-                    @Override
-                    public void onCompleted() {
-                        Log.d(TAG, "onCompleted() called with: " + "");
-
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.d(TAG, "onError() called with: " + "e = [" + e + "]");
-                    }
-
-                    @Override
-                    public void onNext(OpenWeatherMap openWeatherMap) {
-                        Log.d(TAG, "onNext() called with: " + "openWeatherMap = [" + openWeatherMap + "]");
-
-                        CityRealm cityRealmTemp = RealmUtil.getCityWithWeather(openWeatherMap);
-                        Realm realm = Realm.getDefaultInstance();
-                        realm.beginTransaction();
-                        CityRealm cityRealm = realm.copyToRealmOrUpdate(cityRealmTemp);
-                        realm.commitTransaction();
-                    }
-                });
 
         List<String> cities = new ArrayList<>();
         cities.add("Pune");

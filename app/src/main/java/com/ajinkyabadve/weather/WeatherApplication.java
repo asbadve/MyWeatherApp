@@ -44,7 +44,7 @@ public class WeatherApplication extends Application {
                     .build()
                     .schedule();
         } else {
-            JobManager.instance().cancelAll();//just remove it after production
+//            JobManager.instance().cancelAll();//just remove it after production
         }
 
 
@@ -61,6 +61,13 @@ public class WeatherApplication extends Application {
     public OpenWeatherMapService getOpenWeatherMapService() {
         if (openWeatherMapService == null) {
             openWeatherMapService = OpenWeatherMapService.Factory.create();
+        }
+        return openWeatherMapService;
+    }
+
+    public OpenWeatherMapService getOpenWeatherMapPlacesService() {
+        if (openWeatherMapService == null) {
+            openWeatherMapService = OpenWeatherMapService.Factory.cretePlaceService();
         }
         return openWeatherMapService;
     }

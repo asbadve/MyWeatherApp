@@ -1,9 +1,11 @@
 package com.ajinkyabadve.weather.viewmodel;
 
 import android.content.Context;
+import android.databinding.BaseObservable;
 import android.databinding.ObservableField;
 import android.databinding.ObservableInt;
 import android.util.Log;
+import android.view.View;
 
 import com.ajinkyabadve.weather.WeatherApplication;
 import com.ajinkyabadve.weather.model.OpenWeatherMap;
@@ -22,20 +24,49 @@ import rx.android.schedulers.AndroidSchedulers;
 /**
  * Created by Ajinkya on 26-06-2016.
  */
-public class MainViewModel implements ViewModel {
+public class MainViewModel extends BaseObservable implements ViewModel {
 
     private static final String TAG = MainViewModel.class.getSimpleName();
+    private final Realm realm;
+    private final OnDialogShow onDialogShow;
     public ObservableInt helloVisibility;
     public ObservableField<String> infoMessage;
     private Subscription subscription;
     private Context context;
 
+    public interface OnDialogShow {
+        void onAddCityDialogShow();
+    }
 
-    public MainViewModel(Context context) {
+
+    public MainViewModel(Context context, OnDialogShow onDialogShow) {
+        realm = Realm.getDefaultInstance();
         this.context = context;
+        this.onDialogShow = onDialogShow;
         infoMessage = new ObservableField<>("hello world");
+        checkAnyCityAddedOrNot();
         //loadWeather();
     }
+
+    /***
+     * checks any city has been added or not if not then open dialog fragment to add the city
+     */
+    private void checkAnyCityAddedOrNot() {
+        long cityCount = realm.where(CityRealm.class).count();
+        if (cityCount == 0) {
+            if (onDialogShow != null) {
+                onDialogShow.onAddCityDialogShow();
+            }
+        }
+
+    }
+
+    public void onFabClick(View view) {
+        if (onDialogShow != null) {
+            onDialogShow.onAddCityDialogShow();
+        }
+    }
+
 
     private void loadWeather() {
         if (subscription != null && !subscription.isUnsubscribed()) subscription.unsubscribe();

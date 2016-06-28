@@ -1,16 +1,21 @@
 package com.ajinkyabadve.weather.view;
 
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.ajinkyabadve.Realm.R;
-import com.ajinkyabadve.Realm.databinding.ActivityMainBinding;
+import com.ajinkyabadve.weather.R;
+import com.ajinkyabadve.weather.databinding.ActivityMainBinding;
 import com.ajinkyabadve.weather.model.realm.CityRealm;
 import com.ajinkyabadve.weather.viewmodel.MainViewModel;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
@@ -19,10 +24,11 @@ import io.realm.RealmResults;
 /**
  * test
  */
-public class MainActivity extends AppCompatActivity implements RealmChangeListener<RealmResults<CityRealm>> {
+public class MainActivity extends AppCompatActivity implements RealmChangeListener<RealmResults<CityRealm>>, MainViewModel.OnDialogShow {
     private static final String TAG = MainActivity.class.getSimpleName();
+    private static final int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private MainViewModel mainViewModel;
-    private ActivityMainBinding activityMainBinding;
+    ActivityMainBinding activityMainBinding;
 
     Realm realm;
     private RealmResults<CityRealm> resultRealmResults;
@@ -45,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        mainViewModel = new MainViewModel(MainActivity.this);
+        mainViewModel = new MainViewModel(MainActivity.this, this);
         activityMainBinding.setViewModel(mainViewModel);
         setSupportActionBar(activityMainBinding.toolbar);
 //        setContentView(R.layout.activity_main);
@@ -90,5 +96,23 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
         if (element.size() > 0) {
             CityRealm df = element.get(0);
         }
+    }
+
+    @Override
+    public void onAddCityDialogShow() {
+
+        try {
+            Intent intent =
+                    new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
+                            .build(this);
+            startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+        } catch (GooglePlayServicesRepairableException e) {
+            // TODO: Handle the error.
+        } catch (GooglePlayServicesNotAvailableException e) {
+            // TODO: Handle the error.
+        }
+//        FragmentManager fm = getSupportFragmentManager();
+//        AddCityDialogFragment addCityDialogFragment = AddCityDialogFragment.newInstance("Some Title");
+//        addCityDialogFragment.show(fm, "fragment_edit_name");
     }
 }
