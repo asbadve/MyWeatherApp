@@ -15,8 +15,8 @@ public class WeatherJobCreator implements JobCreator {
     public Job create(String tag) {
         Log.d(TAG, "create() called with: " + "tag = [" + tag + "]");
         switch (tag) {
-            case WeatherPeriodicJob.TAG:
-                return new WeatherPeriodicJob();
+            case WeatherPeriodWiseJob.TAG:
+                return new WeatherPeriodWiseJob();
             case WeatherExactJob.TAG:
                 return new WeatherExactJob();
             default:
