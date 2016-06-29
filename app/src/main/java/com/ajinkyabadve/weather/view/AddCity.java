@@ -3,6 +3,7 @@ package com.ajinkyabadve.weather.view;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,7 +11,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.ajinkyabadve.weather.CitiesAdapter;
+import com.ajinkyabadve.weather.view.adapter.CitiesAdapter;
 import com.ajinkyabadve.weather.R;
 import com.ajinkyabadve.weather.databinding.ActivityAddCityBinding;
 import com.ajinkyabadve.weather.model.realm.CityRealm;
@@ -125,8 +126,16 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
     public void onCityAddedError(int errorFlag) {
         switch (errorFlag) {
             // TODO: 29/06/2016  show accurate error flags
-        }
+            case AddCityActivityViewModel.FLAG_CITY_ALREADY_PRESENT:
+                Snackbar snackbar = Snackbar.make(activityAddCityBinding.coordinateLayout, "This city is already added", Snackbar.LENGTH_LONG);
+                snackbar.show();
+                break;
+            case AddCityActivityViewModel.FLAG_CITY_SOMETHING_WENT_WRONG:
+                break;
+            case AddCityActivityViewModel.FLAG_CITY_WEATHER_NOT_AVAILABLE:
+                break;
 
+        }
     }
 
     @Override

@@ -1,10 +1,11 @@
-package com.ajinkyabadve.weather;
+package com.ajinkyabadve.weather.view.adapter;
 
 import android.databinding.DataBindingUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import com.ajinkyabadve.weather.R;
 import com.ajinkyabadve.weather.databinding.ItemCityBinding;
 import com.ajinkyabadve.weather.model.realm.CityRealm;
 import com.ajinkyabadve.weather.viewmodel.ItemCityViewModel;

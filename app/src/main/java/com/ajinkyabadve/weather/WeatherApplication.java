@@ -37,6 +37,7 @@ public class WeatherApplication extends Application {
 
         realm = Realm.getDefaultInstance();
 
+
         Set<JobRequest> allJobRequests = JobManager.instance().getAllJobRequests();
         if (allJobRequests.size() == 0) {
             int jobId = new JobRequest.Builder(WeatherExactJob.TAG)
@@ -95,5 +96,6 @@ public class WeatherApplication extends Application {
         super.attachBaseContext(base);
         MultiDex.install(this);
     }
+
 
 }

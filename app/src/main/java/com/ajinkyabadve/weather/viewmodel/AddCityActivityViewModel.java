@@ -4,10 +4,12 @@ import android.content.Context;
 import android.support.annotation.IntDef;
 import android.util.Log;
 
+import com.ajinkyabadve.weather.R;
 import com.ajinkyabadve.weather.WeatherApplication;
 import com.ajinkyabadve.weather.model.OpenWeatherMap;
 import com.ajinkyabadve.weather.model.OpenWeatherMapService;
 import com.ajinkyabadve.weather.model.realm.CityRealm;
+import com.ajinkyabadve.weather.model.realm.ListRealm;
 import com.ajinkyabadve.weather.model.realm.RealmUtil;
 import com.google.android.gms.location.places.Place;
 
@@ -20,6 +22,7 @@ import java.util.Map;
 import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
+import io.realm.RealmList;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.Sort;
@@ -93,15 +96,19 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
         cityRealms.removeChangeListener(this);
     }
 
+    /**
+     * Validate the place form autocomplete api
+     *
+     * @param place
+     */
     public void checkIfPlaceIsValid(final Place place) {
-
 
         if (subscription != null && !subscription.isUnsubscribed()) subscription.unsubscribe();
         WeatherApplication weatherApplication = WeatherApplication.get(context);
         OpenWeatherMapService openWeatherMapService = weatherApplication.getOpenWeatherMapService();
         Map<String, String> queryParam = new HashMap<>();
-        queryParam.put("cnt", "14");
-        queryParam.put("APPID", "8be06227a313736007f84b540e2aed5f");
+        queryParam.put("cnt", context.getString(R.string.cnt_parameter_for_days));
+        queryParam.put("APPID", context.getString(R.string.open_weather_map));
 
         subscription = openWeatherMapService.getWeatherForeCastByCity(place.getName().toString(), queryParam)
                 .observeOn(AndroidSchedulers.mainThread())
@@ -127,7 +134,18 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
                         RealmQuery<CityRealm> cityRealms = realm.where(CityRealm.class).contains("name", cityRealmTemp.getName(), Case.SENSITIVE);
                         if (openWeatherMap.getCity().getName().equals(place.getName().toString()) && cityRealms.count() == 0) {
                             realm.beginTransaction();
+                            cityRealmTemp.setDefault(true);
                             CityRealm cityRealm = realm.copyToRealmOrUpdate(cityRealmTemp);
+
+
+                            RealmResults<CityRealm> cityRealmRealmQuery = realm.where(CityRealm.class).findAll().where().equalTo("id", cityRealm.getId()).not().findAll();
+                            RealmList<CityRealm> cityRealms1 = new RealmList<CityRealm>();
+                            cityRealms1.addAll(cityRealmRealmQuery.subList(0, cityRealmRealmQuery.size()));
+                            for (int i = 0; i < cityRealms1.size(); i++) {
+                                cityRealms1.get(i).setDefault(false);
+                            }
+
+
                             realm.commitTransaction();
 
                         } else {

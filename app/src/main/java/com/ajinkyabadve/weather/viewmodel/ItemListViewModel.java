@@ -3,6 +3,7 @@ package com.ajinkyabadve.weather.viewmodel;
 import android.content.Context;
 import android.databinding.BaseObservable;
 
+import com.ajinkyabadve.weather.Util;
 import com.ajinkyabadve.weather.model.realm.ListRealm;
 
 /**
@@ -18,7 +19,7 @@ public class ItemListViewModel extends BaseObservable implements ViewModel {
     }
 
     public String getDt() {
-        return String.valueOf(listRealm.getDt());
+        return Util.getDateFormatByString(listRealm.getDt())+" in mili"+listRealm.getDt();
     }
 
 

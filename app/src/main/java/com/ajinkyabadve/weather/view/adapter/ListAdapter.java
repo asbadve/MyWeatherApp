@@ -1,15 +1,13 @@
-package com.ajinkyabadve.weather;
+package com.ajinkyabadve.weather.view.adapter;
 
 import android.databinding.DataBindingUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
+import com.ajinkyabadve.weather.R;
 import com.ajinkyabadve.weather.databinding.ListItemBinding;
-import com.ajinkyabadve.weather.model.realm.CityRealm;
 import com.ajinkyabadve.weather.model.realm.ListRealm;
-import com.ajinkyabadve.weather.viewmodel.ItemCityViewModel;
 import com.ajinkyabadve.weather.viewmodel.ItemListViewModel;
 
 import io.realm.RealmList;

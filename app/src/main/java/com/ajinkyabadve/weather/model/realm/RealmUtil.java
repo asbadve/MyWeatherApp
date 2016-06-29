@@ -7,6 +7,8 @@ import com.ajinkyabadve.weather.model.OpenWeatherMap;
 import com.ajinkyabadve.weather.model.Temp;
 import com.ajinkyabadve.weather.model.Weather;
 
+import java.util.ArrayList;
+
 import io.realm.RealmList;
 
 /**
@@ -79,5 +81,35 @@ public class RealmUtil {
             listRealmRealmList.add(listRealm);
         }
         return listRealmRealmList;
+    }
+
+    public static java.util.List<CityRealm> getCityWithWeather(java.util.List<OpenWeatherMap> openWeatherMapList) {
+        java.util.List<CityRealm> cityRealmList = new ArrayList<>();
+        for (int i = 0; i < openWeatherMapList.size(); i++) {
+            OpenWeatherMap openWeatherMap = openWeatherMapList.get(i);
+            City city = openWeatherMap.getCity();
+            Coord coord = city.getCoord();
+
+
+            CityRealm cityRealm = new CityRealm();
+            cityRealm.setId(city.getId());
+            cityRealm.setName(city.getName());
+
+            CoordRealm coordRealm = new CoordRealm();
+            coordRealm.setLat(coord.getLat());
+            coordRealm.setLon(coord.getLon());
+            coordRealm.setId(city.getId());//explicit given proimary key
+
+            cityRealm.setCountry(city.getCountry());
+            cityRealm.setPopulation(city.getPopulation());
+            cityRealm.setCod(openWeatherMap.getCod());
+            cityRealm.setMessage(openWeatherMap.getMessage());
+            cityRealm.setCnt(openWeatherMap.getCnt());
+            cityRealm.setCoordRealm(coordRealm);
+            cityRealm.setListRealm(getListRealm(openWeatherMap.getList(), cityRealm));
+            cityRealmList.add(cityRealm);
+        }
+
+        return cityRealmList;
     }
 }

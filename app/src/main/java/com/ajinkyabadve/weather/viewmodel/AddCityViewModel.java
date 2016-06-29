@@ -1,9 +1,6 @@
 package com.ajinkyabadve.weather.viewmodel;
 
 import android.content.Context;
-import android.util.Log;
-
-import com.arlib.floatingsearchview.FloatingSearchView;
 
 /**
  * Created by Ajinkya on 28-06-2016.

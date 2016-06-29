@@ -1,38 +1,19 @@
 package com.ajinkyabadve.weather.view;
 
-import android.app.Dialog;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatDialogFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-
-
 import android.view.ViewGroup;
-import android.view.Window;
 
 import com.ajinkyabadve.weather.R;
-import com.ajinkyabadve.weather.WeatherApplication;
 import com.ajinkyabadve.weather.databinding.FragmentDialogAddCityBinding;
-import com.ajinkyabadve.weather.model.OpenWeatherMap;
-import com.ajinkyabadve.weather.model.OpenWeatherMapService;
-import com.ajinkyabadve.weather.model.Places;
-import com.ajinkyabadve.weather.model.realm.CityRealm;
-import com.ajinkyabadve.weather.model.realm.RealmUtil;
 import com.ajinkyabadve.weather.viewmodel.AddCityViewModel;
-import com.arlib.floatingsearchview.FloatingSearchView;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import io.realm.Realm;
-import rx.Subscriber;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
 
 /**
  * Created by Ajinkya on 28-06-2016.

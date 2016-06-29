@@ -14,8 +14,13 @@ import com.ajinkyabadve.weather.R;
 import com.ajinkyabadve.weather.databinding.ActivityMainBinding;
 import com.ajinkyabadve.weather.model.realm.CityRealm;
 import com.ajinkyabadve.weather.model.realm.ListRealm;
-import com.ajinkyabadve.weather.ListAdapter;
+import com.ajinkyabadve.weather.view.adapter.ListAdapter;
 import com.ajinkyabadve.weather.viewmodel.MainViewModel;
+
+import java.text.DateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
@@ -90,10 +95,25 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
     public void onChange(RealmResults<CityRealm> element) {
         Log.d(TAG, "onChange() called with: " + "element = [" + element + "]");
         if (element.size() > 0) {
-            CityRealm cityRealm = element.get(0);//just for now get the first o.w get the default selected city
-            RealmList<ListRealm> listRealm = cityRealm.getListRealm();
-            ListAdapter listAdapter = (ListAdapter) activityMainBinding.weather.getAdapter();
-            listAdapter.setList(listRealm);
+            CityRealm cityRealm = element.where().equalTo("isDefault",false).findFirst();
+            //just for now get the first o.w get the default selected city from shared prefrence
+            if (cityRealm != null) {
+                activityMainBinding.toolbar.setTitle(cityRealm.getName());
+                long fromUnix = System.currentTimeMillis() / 1000L;
+                Calendar c = Calendar.getInstance();
+                c.setTimeInMillis(fromUnix);
+                c.add(Calendar.DATE, 14);
+                long toUnix = c.getTimeInMillis();
+                RealmResults<ListRealm> listRealmRealmResults = cityRealm.getListRealm().where().between("dt", fromUnix, toUnix).findAll();
+                RealmList<ListRealm> listRealm = new RealmList<ListRealm>();
+                listRealm.addAll(listRealmRealmResults.subList(0, listRealmRealmResults.size()));
+                ListAdapter listAdapter = (ListAdapter) activityMainBinding.weather.getAdapter();
+                if (listAdapter != null) {
+                    listAdapter.setList(listRealm);
+                    listAdapter.notifyDataSetChanged();
+                }
+            }
+
         }
     }
 
