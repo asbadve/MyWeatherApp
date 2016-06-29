@@ -38,8 +38,8 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
     protected void onStart() {
         super.onStart();
         realm = Realm.getDefaultInstance();
-        resultRealmResults.addChangeListener(this);
         resultRealmResults = realm.where(CityRealm.class).findAllAsync();
+        resultRealmResults.addChangeListener(this);
     }
 
     @Override

@@ -81,7 +81,7 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
                         .setTypeFilter(AutocompleteFilter.TYPE_FILTER_CITIES)
                         .build();
                 Intent intent =
-                        new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
+                        new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
                                 .setFilter(typeFilter)
                                 .build(AddCity.this);
 
