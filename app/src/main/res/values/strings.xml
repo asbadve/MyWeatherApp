@@ -2,4 +2,6 @@
     <string name="app_name">Weather</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_maps">Map</string>
+    <string name="title_activity_add_city">AddCity</string>
+    <string name="title_activity_maps_activity_test">Map</string>
 </resources>

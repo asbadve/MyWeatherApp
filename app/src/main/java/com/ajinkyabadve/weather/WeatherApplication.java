@@ -2,6 +2,7 @@ package com.ajinkyabadve.weather;
 
 import android.app.Application;
 import android.content.Context;
+import android.support.multidex.MultiDex;
 
 import com.ajinkyabadve.weather.JobSchedular.WeatherExactJob;
 import com.ajinkyabadve.weather.JobSchedular.WeatherJobCreator;
@@ -87,6 +88,12 @@ public class WeatherApplication extends Application {
     //User to change scheduler from tests
     public void setDefaultSubscribeScheduler(Scheduler scheduler) {
         this.defaultSubscribeScheduler = scheduler;
+    }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
     }
 
 }

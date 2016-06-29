@@ -5,4 +5,8 @@ package com.ajinkyabadve.weather.viewmodel;
  */
 public interface ViewModel {
     void onDestroy();
+
+    void onStart();
+
+    void Stop();
 }

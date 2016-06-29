@@ -17,6 +17,16 @@ public class AddCityViewModel implements ViewModel {
 
     }
 
+    @Override
+    public void onStart() {
+
+    }
+
+    @Override
+    public void Stop() {
+
+    }
+
     public AddCityViewModel(Context context) {
         this.context = context;
     }

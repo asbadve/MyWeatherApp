@@ -16,6 +16,7 @@ public class CityRealm extends RealmObject {
     private String cod;
     private Double message;
     private Integer cnt;
+    private boolean isDefault;
     private RealmList<ListRealm> listRealm = new RealmList<ListRealm>();
 
 
@@ -104,5 +105,13 @@ public class CityRealm extends RealmObject {
                 ", cnt=" + cnt +
                 ", listRealm=" + listRealm +
                 '}';
+    }
+
+    public boolean isDefault() {
+        return isDefault;
+    }
+
+    public void setDefault(boolean aDefault) {
+        isDefault = aDefault;
     }
 }

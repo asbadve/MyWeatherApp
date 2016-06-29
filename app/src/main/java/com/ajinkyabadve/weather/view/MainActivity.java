@@ -3,8 +3,9 @@ package com.ajinkyabadve.weather.view;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,13 +13,13 @@ import android.view.MenuItem;
 import com.ajinkyabadve.weather.R;
 import com.ajinkyabadve.weather.databinding.ActivityMainBinding;
 import com.ajinkyabadve.weather.model.realm.CityRealm;
+import com.ajinkyabadve.weather.model.realm.ListRealm;
+import com.ajinkyabadve.weather.ListAdapter;
 import com.ajinkyabadve.weather.viewmodel.MainViewModel;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
+import io.realm.RealmList;
 import io.realm.RealmResults;
 
 /**
@@ -37,8 +38,8 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
     protected void onStart() {
         super.onStart();
         realm = Realm.getDefaultInstance();
-        resultRealmResults = realm.where(CityRealm.class).findAllAsync();
         resultRealmResults.addChangeListener(this);
+        resultRealmResults = realm.where(CityRealm.class).findAllAsync();
     }
 
     @Override
@@ -54,18 +55,13 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
         mainViewModel = new MainViewModel(MainActivity.this, this);
         activityMainBinding.setViewModel(mainViewModel);
         setSupportActionBar(activityMainBinding.toolbar);
-//        setContentView(R.layout.activity_main);
-//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-//        setSupportActionBar(toolbar);
-//
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
+        setWeatherRecyclerView(activityMainBinding.weather);
+    }
+
+    private void setWeatherRecyclerView(RecyclerView recyclerView) {
+        ListAdapter listAdapter = new ListAdapter();
+        recyclerView.setAdapter(listAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     @Override
@@ -94,23 +90,19 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
     public void onChange(RealmResults<CityRealm> element) {
         Log.d(TAG, "onChange() called with: " + "element = [" + element + "]");
         if (element.size() > 0) {
-            CityRealm df = element.get(0);
+            CityRealm cityRealm = element.get(0);//just for now get the first o.w get the default selected city
+            RealmList<ListRealm> listRealm = cityRealm.getListRealm();
+            ListAdapter listAdapter = (ListAdapter) activityMainBinding.weather.getAdapter();
+            listAdapter.setList(listRealm);
         }
     }
 
     @Override
     public void onAddCityDialogShow() {
 
-        try {
-            Intent intent =
-                    new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
-                            .build(this);
-            startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
-        } catch (GooglePlayServicesRepairableException e) {
-            // TODO: Handle the error.
-        } catch (GooglePlayServicesNotAvailableException e) {
-            // TODO: Handle the error.
-        }
+        startActivity(new Intent(MainActivity.this, AddCity.class));
+
+
 //        FragmentManager fm = getSupportFragmentManager();
 //        AddCityDialogFragment addCityDialogFragment = AddCityDialogFragment.newInstance("Some Title");
 //        addCityDialogFragment.show(fm, "fragment_edit_name");

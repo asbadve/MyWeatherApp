@@ -113,5 +113,15 @@ public class MainViewModel extends BaseObservable implements ViewModel {
 
     }
 
+    @Override
+    public void onStart() {
+
+    }
+
+    @Override
+    public void Stop() {
+
+    }
+
 
 }
