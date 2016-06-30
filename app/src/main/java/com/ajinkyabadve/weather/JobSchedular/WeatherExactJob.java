@@ -45,6 +45,8 @@ public class WeatherExactJob extends Job {
         final Map<String, String> queryParam = new HashMap<>();
         queryParam.put("cnt", getContext().getString(R.string.cnt_parameter_for_days));
         queryParam.put("APPID", getContext().getString(R.string.open_weather_map));
+        queryParam.put("units",getContext().getString(R.string.unit_param));
+
         Realm realm = Realm.getDefaultInstance();
         List<String> cities = new ArrayList<>();
         RealmResults<CityRealm> cityRealms = realm.where(CityRealm.class).findAll();

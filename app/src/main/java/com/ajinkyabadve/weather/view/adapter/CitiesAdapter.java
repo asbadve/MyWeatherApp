@@ -1,7 +1,6 @@
 package com.ajinkyabadve.weather.view.adapter;
 
 import android.databinding.DataBindingUtil;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -18,7 +17,6 @@ import io.realm.RealmResults;
  * Created by Ajinkya on 29/06/2016.
  */
 public class CitiesAdapter extends RecyclerView.Adapter<CitiesAdapter.CitiesViewHolder> {
-    private int defaultId = 0;
     RealmResults<CityRealm> cityRealms;
     private OnCitySelected onCitySelected;
 
@@ -30,13 +28,11 @@ public class CitiesAdapter extends RecyclerView.Adapter<CitiesAdapter.CitiesView
         void OnCitySelectedFromAdapter(CityRealm cityRealm);
     }
 
-    public CitiesAdapter(OnCitySelected OnCitySelected, int defaultId) {
-        this.defaultId = defaultId;
+    public CitiesAdapter(OnCitySelected OnCitySelected) {
         this.onCitySelected = OnCitySelected;
     }
 
-    public void setCityRealms(RealmResults<CityRealm> cityRealms, int defaultId) {
-        this.defaultId = defaultId;
+    public void setCityRealms(RealmResults<CityRealm> cityRealms) {
         this.cityRealms = cityRealms;
         notifyDataSetChanged();
     }
@@ -53,11 +49,6 @@ public class CitiesAdapter extends RecyclerView.Adapter<CitiesAdapter.CitiesView
 
     @Override
     public void onBindViewHolder(CitiesViewHolder holder, int position) {
-        if (defaultId == cityRealms.get(position).getId()) {
-            holder.itemCityBinding.rootView.setBackgroundColor(ContextCompat.getColor(holder.itemCityBinding.rootView.getContext(), R.color.colorAccentFaint));
-        } else {
-            holder.itemCityBinding.rootView.setBackgroundColor(ContextCompat.getColor(holder.itemCityBinding.rootView.getContext(), android.R.color.white));
-        }
         holder.bindCity(cityRealms.get(position));
     }
 

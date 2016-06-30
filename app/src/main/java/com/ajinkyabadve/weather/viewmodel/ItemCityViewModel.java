@@ -19,12 +19,14 @@ public class ItemCityViewModel extends BaseObservable implements ViewModel {
     private CityRealm cityRealm;
     private Context context;
     private CitiesAdapter.OnItemClick onItemClick;
+    private int defaultId;
 
     public ItemCityViewModel(Context context, CityRealm cityRealm, CitiesAdapter.OnItemClick onItemClick) {
         this.cityRealm = cityRealm;
         this.context = context;
         this.onItemClick = onItemClick;
         sharedPreferenceDataManager = SharedPreferenceDataManager.getInstance(context);
+        defaultId = sharedPreferenceDataManager.getSavedDefaultCityIdPreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID);
 
     }
 
@@ -58,6 +60,10 @@ public class ItemCityViewModel extends BaseObservable implements ViewModel {
 //        }
 //        realm.commitTransaction();
 
+    }
+
+    public boolean isDefaultCity() {
+        return (defaultId == cityRealm.getId());
     }
 
 

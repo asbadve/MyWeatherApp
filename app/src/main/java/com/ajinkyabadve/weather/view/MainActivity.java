@@ -15,10 +15,12 @@ import com.ajinkyabadve.weather.databinding.ActivityMainBinding;
 import com.ajinkyabadve.weather.model.realm.CityRealm;
 import com.ajinkyabadve.weather.model.realm.ListRealm;
 import com.ajinkyabadve.weather.util.SharedPreferenceDataManager;
+import com.ajinkyabadve.weather.util.Util;
 import com.ajinkyabadve.weather.view.adapter.ListAdapter;
 import com.ajinkyabadve.weather.viewmodel.MainViewModel;
 
 import java.util.Calendar;
+import java.util.Date;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
@@ -105,12 +107,15 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
             //just for now get the first o.w get the default selected city from shared prefrence
             if (cityRealm != null) {
                 activityMainBinding.toolbar.setTitle(cityRealm.getName());
-                long fromUnix = System.currentTimeMillis() / 1000L;
-                Calendar c = Calendar.getInstance();
-                c.setTimeInMillis(fromUnix);
-                c.add(Calendar.DATE, 14);
-                long toUnix = c.getTimeInMillis();
-                RealmResults<ListRealm> listRealmRealmResults = cityRealm.getListRealm().where().between("dt", fromUnix, toUnix).findAll();
+
+                String startDate = Util.getDbDateString(new Date());
+                String endDate = Util.getDbDateStringAfter14Days(new Date());
+//                long fromUnix = System.currentTimeMillis() / 1000L;
+//                Calendar c = Calendar.getInstance();
+//                c.setTimeInMillis(fromUnix);
+//                c.add(Calendar.DATE, 14);
+//                long toUnix = c.getTimeInMillis();
+                RealmResults<ListRealm> listRealmRealmResults = cityRealm.getListRealm().where().between("dt", Integer.parseInt(startDate), Integer.parseInt(endDate)).findAll();
                 RealmList<ListRealm> listRealm = new RealmList<ListRealm>();
                 listRealm.addAll(listRealmRealmResults.subList(0, listRealmRealmResults.size()));
                 ListAdapter listAdapter = (ListAdapter) activityMainBinding.weather.getAdapter();

@@ -44,7 +44,7 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
     }
 
     private void setUpRecyclerView(RecyclerView recyclerView) {
-        CitiesAdapter citiesAdapter = new CitiesAdapter(this, SharedPreferenceDataManager.getInstance(AddCity.this).getSavedDefaultCityIdPreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID));
+        CitiesAdapter citiesAdapter = new CitiesAdapter(this);
         recyclerView.setAdapter(citiesAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
@@ -156,7 +156,7 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
     public void onCityAdded(RealmResults<CityRealm> cityRealms, SharedPreferenceDataManager sharedPreferenceDataManager) {
         CitiesAdapter adapter = (CitiesAdapter) activityAddCityBinding.cities.getAdapter();
         if (adapter != null) {
-            adapter.setCityRealms(cityRealms, sharedPreferenceDataManager.getSavedDefaultCityIdPreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID));
+            adapter.setCityRealms(cityRealms);
         }
     }
 

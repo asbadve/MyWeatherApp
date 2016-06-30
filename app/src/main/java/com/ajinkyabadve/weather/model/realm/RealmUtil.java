@@ -6,8 +6,10 @@ import com.ajinkyabadve.weather.model.List;
 import com.ajinkyabadve.weather.model.OpenWeatherMap;
 import com.ajinkyabadve.weather.model.Temp;
 import com.ajinkyabadve.weather.model.Weather;
+import com.ajinkyabadve.weather.util.Util;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import io.realm.RealmList;
 
@@ -46,8 +48,14 @@ public class RealmUtil {
             List listObjectFromOpenWM = listFromOpenWeatherMap.get(i);
             ListRealm listRealm = new ListRealm();
 
-            listRealm.setDtAndCityId(listObjectFromOpenWM.getDt() + "," + cityRealm.getId());
-            listRealm.setDt(listObjectFromOpenWM.getDt());
+
+            int dateToSave = Util.getDbDateLong(new Date(listObjectFromOpenWM.getDt() * 1000L));
+
+
+            listRealm.setDtAndCityId(dateToSave + "," + cityRealm.getId());
+
+
+            listRealm.setDt(dateToSave);
             Temp temp = listObjectFromOpenWM.getTemp();
             TempRealm tempRealm = new TempRealm();
             tempRealm.setId(listObjectFromOpenWM.getDt() + "," + cityRealm.getId());
@@ -73,7 +81,7 @@ public class RealmUtil {
                 weatherRealm.setIcon(weather.getIcon());
                 weatherRealmRealmList.add(weatherRealm);
             }
-
+            listRealm.setWeatherRealm(weatherRealmRealmList);
             listRealm.setSpeed(listObjectFromOpenWM.getSpeed());
             listRealm.setDeg(listObjectFromOpenWM.getDeg());
             listRealm.setClouds(listObjectFromOpenWM.getClouds());

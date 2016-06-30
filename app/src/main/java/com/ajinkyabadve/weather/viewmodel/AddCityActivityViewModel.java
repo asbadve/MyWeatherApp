@@ -111,6 +111,8 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
         Map<String, String> queryParam = new HashMap<>();
         queryParam.put("cnt", context.getString(R.string.cnt_parameter_for_days));
         queryParam.put("APPID", context.getString(R.string.open_weather_map));
+        queryParam.put("units",context.getString(R.string.unit_param));
+
 
         subscription = openWeatherMapService.getWeatherForeCastByCity(place.getName().toString(), queryParam)
                 .observeOn(AndroidSchedulers.mainThread())

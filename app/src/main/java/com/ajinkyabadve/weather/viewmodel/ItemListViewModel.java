@@ -2,6 +2,8 @@ package com.ajinkyabadve.weather.viewmodel;
 
 import android.content.Context;
 import android.databinding.BaseObservable;
+import android.databinding.BindingAdapter;
+import android.widget.ImageView;
 
 import com.ajinkyabadve.weather.util.Util;
 import com.ajinkyabadve.weather.model.realm.ListRealm;
@@ -19,8 +21,26 @@ public class ItemListViewModel extends BaseObservable implements ViewModel {
     }
 
     public String getDt() {
-        return Util.getDateFormatByString(listRealm.getDt())+" in mili"+listRealm.getDt();
+        return Util.getFormattedMonthDay(context, String.valueOf(listRealm.getDt()));
     }
+
+    public String getMainForecast() {
+        return listRealm.getWeatherRealm().get(0).getMain();
+    }
+
+    public String getHighTemp() {
+        return Util.formatTemperature(context, listRealm.getTempRealm().getMax());
+    }
+
+    public String getLowTemp() {
+        return Util.formatTemperature(context, listRealm.getTempRealm().getMin());
+    }
+
+    public int getWeatherImage() {
+        return Util.getIconResourceForWeatherCondition(listRealm.getWeatherRealm().get(0).getId());
+    }
+
+
 
 
     @Override
