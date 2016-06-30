@@ -14,13 +14,11 @@ import com.ajinkyabadve.weather.R;
 import com.ajinkyabadve.weather.databinding.ActivityMainBinding;
 import com.ajinkyabadve.weather.model.realm.CityRealm;
 import com.ajinkyabadve.weather.model.realm.ListRealm;
+import com.ajinkyabadve.weather.util.SharedPreferenceDataManager;
 import com.ajinkyabadve.weather.view.adapter.ListAdapter;
 import com.ajinkyabadve.weather.viewmodel.MainViewModel;
 
-import java.text.DateFormat;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
@@ -95,7 +93,15 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
     public void onChange(RealmResults<CityRealm> element) {
         Log.d(TAG, "onChange() called with: " + "element = [" + element + "]");
         if (element.size() > 0) {
-            CityRealm cityRealm = element.where().equalTo("isDefault",false).findFirst();
+
+            int cityIdPreference = SharedPreferenceDataManager.getInstance(MainActivity.this).getSavedDefaultCityIdPreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID);
+            CityRealm cityRealm = null;
+            if (cityIdPreference != 0) {
+                cityRealm = element.where().equalTo("id", cityIdPreference).findFirst();
+            } else {
+                cityRealm = element.where().findFirst();
+            }
+
             //just for now get the first o.w get the default selected city from shared prefrence
             if (cityRealm != null) {
                 activityMainBinding.toolbar.setTitle(cityRealm.getName());
@@ -113,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
                     listAdapter.notifyDataSetChanged();
                 }
             }
+
 
         }
     }

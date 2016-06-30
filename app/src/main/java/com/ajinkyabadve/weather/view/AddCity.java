@@ -11,10 +11,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.ajinkyabadve.weather.view.adapter.CitiesAdapter;
 import com.ajinkyabadve.weather.R;
 import com.ajinkyabadve.weather.databinding.ActivityAddCityBinding;
 import com.ajinkyabadve.weather.model.realm.CityRealm;
+import com.ajinkyabadve.weather.util.SharedPreferenceDataManager;
+import com.ajinkyabadve.weather.view.adapter.CitiesAdapter;
 import com.ajinkyabadve.weather.viewmodel.AddCityActivityViewModel;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -25,7 +26,7 @@ import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 
 import io.realm.RealmResults;
 
-public class AddCity extends AppCompatActivity implements AddCityActivityViewModel.ActivityModelCommunicationListener {
+public class AddCity extends AppCompatActivity implements AddCityActivityViewModel.ActivityModelCommunicationListener, CitiesAdapter.OnCitySelected {
     AddCityActivityViewModel addCityActivityViewModel;
 
     private static final int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
@@ -43,7 +44,7 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
     }
 
     private void setUpRecyclerView(RecyclerView recyclerView) {
-        CitiesAdapter citiesAdapter = new CitiesAdapter();
+        CitiesAdapter citiesAdapter = new CitiesAdapter(this, SharedPreferenceDataManager.getInstance(AddCity.this).getSavedDefaultCityIdPreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID));
         recyclerView.setAdapter(citiesAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
@@ -82,7 +83,7 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
                         .setTypeFilter(AutocompleteFilter.TYPE_FILTER_CITIES)
                         .build();
                 Intent intent =
-                        new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
+                        new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
                                 .setFilter(typeFilter)
                                 .build(AddCity.this);
 
@@ -93,6 +94,8 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
             }
 
 
+            return true;
+        } else if (id == R.id.action_add_current_city) {
             return true;
         }
 
@@ -106,13 +109,11 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
             if (resultCode == RESULT_OK) {
                 Place place = PlaceAutocomplete.getPlace(this, data);
                 Log.i(TAG, "Place: " + place.getName());
-                // TODO: 29/06/2016 check if this place is in openweather api or not
                 addCityActivityViewModel.checkIfPlaceIsValid(place);
 
 
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(this, data);
-                // TODO: Handle the error.
                 Log.i(TAG, status.getStatusMessage());
 
             } else if (resultCode == RESULT_CANCELED) {
@@ -125,7 +126,6 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
     @Override
     public void onCityAddedError(int errorFlag) {
         switch (errorFlag) {
-            // TODO: 29/06/2016  show accurate error flags
             case AddCityActivityViewModel.FLAG_CITY_ALREADY_PRESENT:
                 Snackbar snackbar = Snackbar.make(activityAddCityBinding.coordinateLayout, "This city is already added", Snackbar.LENGTH_LONG);
                 snackbar.show();
@@ -139,12 +139,15 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
     }
 
     @Override
-    public void onCityAdded(RealmResults<CityRealm> cityRealms) {
-        CitiesAdapter adapter =
-                (CitiesAdapter) activityAddCityBinding.cities.getAdapter();
+    public void onCityAdded(RealmResults<CityRealm> cityRealms, SharedPreferenceDataManager sharedPreferenceDataManager) {
+        CitiesAdapter adapter = (CitiesAdapter) activityAddCityBinding.cities.getAdapter();
         if (adapter != null) {
-            adapter.setCityRealms(cityRealms);
-            adapter.notifyDataSetChanged();
+            adapter.setCityRealms(cityRealms, sharedPreferenceDataManager.getSavedDefaultCityIdPreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID));
         }
+    }
+
+    @Override
+    public void OnCitySelectedFromAdapter(CityRealm cityRealm) {
+        finish();
     }
 }

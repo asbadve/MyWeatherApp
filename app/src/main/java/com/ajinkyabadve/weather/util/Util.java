@@ -1,4 +1,4 @@
-package com.ajinkyabadve.weather;
+package com.ajinkyabadve.weather.util;
 
 import android.text.format.DateFormat;
 import android.util.Log;

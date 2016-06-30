@@ -5,16 +5,22 @@
 
     <data>
 
+        <import type="android.view.View" />
+
         <variable
+
             name="viewModel"
             type="com.ajinkyabadve.weather.viewmodel.ItemCityViewModel" />
     </data>
+
 
     <LinearLayout
         android:id="@+id/rootView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:onClick="@{viewModel.onItemClick}"
         android:orientation="vertical">
+
 
         <TextView
             android:id="@+id/textView"
@@ -22,6 +28,19 @@
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:text="@{viewModel.cityName}"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            tools:text="city Name" />
+
+        <!--<FrameLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:background="@color/colorAccent"-->
+        <!--android:visibility="@{viewModel.isDefault ? View.VISIBLE : View.GONE}">-->
+
+        <!--</FrameLayout>-->
+
+
     </LinearLayout>
+
+
 </layout>

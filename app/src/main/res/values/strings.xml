@@ -5,5 +5,7 @@
     <string name="title_activity_add_city">AddCity</string>
     <string name="title_activity_maps_activity_test">Map</string>
     <string name="cnt_parameter_for_days">16</string>
+    <string name="action_add_current_location">Add Current Location</string>
+    <string name="action_search">Search City</string>
 
 </resources>

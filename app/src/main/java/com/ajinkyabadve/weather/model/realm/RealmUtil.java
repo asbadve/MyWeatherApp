@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import io.realm.RealmList;
 
 /**
+ * TODO: 27/06/2016 create builder method for the non realm class to convert it to relam class
  * Created by Ajinkya on 26-06-2016.
- * // TODO: 27/06/2016 create builder method for the non realm class to convert it to relam class
  */
 public class RealmUtil {
     public static CityRealm getCityWithWeather(OpenWeatherMap openWeatherMap) {

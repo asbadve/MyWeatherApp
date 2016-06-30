@@ -3,7 +3,7 @@ package com.ajinkyabadve.weather.viewmodel;
 import android.content.Context;
 import android.databinding.BaseObservable;
 
-import com.ajinkyabadve.weather.Util;
+import com.ajinkyabadve.weather.util.Util;
 import com.ajinkyabadve.weather.model.realm.ListRealm;
 
 /**

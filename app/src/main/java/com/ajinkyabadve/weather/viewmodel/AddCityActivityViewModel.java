@@ -9,23 +9,20 @@ import com.ajinkyabadve.weather.WeatherApplication;
 import com.ajinkyabadve.weather.model.OpenWeatherMap;
 import com.ajinkyabadve.weather.model.OpenWeatherMapService;
 import com.ajinkyabadve.weather.model.realm.CityRealm;
-import com.ajinkyabadve.weather.model.realm.ListRealm;
 import com.ajinkyabadve.weather.model.realm.RealmUtil;
+import com.ajinkyabadve.weather.util.SharedPreferenceDataManager;
 import com.google.android.gms.location.places.Place;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import io.realm.Case;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
-import io.realm.RealmList;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
-import io.realm.Sort;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -35,6 +32,7 @@ import rx.android.schedulers.AndroidSchedulers;
  */
 public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<RealmResults<CityRealm>> {
     private static final String TAG = AddCityActivityViewModel.class.getSimpleName();
+    private SharedPreferenceDataManager sharedPreferenceDataManager;
     private Subscription subscription;
     private Context context;
     private ActivityModelCommunicationListener activityModelCommunicationListener;
@@ -56,9 +54,8 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
     @Override
     public void onChange(RealmResults<CityRealm> element) {
         if (activityModelCommunicationListener != null) {
-            Realm realm = Realm.getDefaultInstance();
-            RealmResults<CityRealm> cityRealms = realm.where(CityRealm.class).findAll();
-            activityModelCommunicationListener.onCityAdded(cityRealms);
+            cityRealms = element;
+            activityModelCommunicationListener.onCityAdded(cityRealms, sharedPreferenceDataManager);
 
         }
     }
@@ -66,13 +63,14 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
     public interface ActivityModelCommunicationListener {
         void onCityAddedError(@AddCityErrorFlag int errorFlag);
 
-        void onCityAdded(RealmResults<CityRealm> cityRealms);
+        void onCityAdded(RealmResults<CityRealm> cityRealms, SharedPreferenceDataManager sharedPreferenceDataManager);
 
     }
 
     public AddCityActivityViewModel(Context context, ActivityModelCommunicationListener activityModelCommunicationListener) {
         this.context = context;
         this.activityModelCommunicationListener = activityModelCommunicationListener;
+        sharedPreferenceDataManager = SharedPreferenceDataManager.getInstance(context);
     }
 
     @Override
@@ -86,10 +84,11 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
         Realm realm = Realm.getDefaultInstance();
         cityRealms = realm.where(CityRealm.class).findAll();
         if (activityModelCommunicationListener != null) {
-            activityModelCommunicationListener.onCityAdded(cityRealms);
+            activityModelCommunicationListener.onCityAdded(cityRealms, sharedPreferenceDataManager);
         }
         cityRealms.addChangeListener(this);
     }
+
 
     @Override
     public void Stop() {
@@ -134,18 +133,12 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
                         RealmQuery<CityRealm> cityRealms = realm.where(CityRealm.class).contains("name", cityRealmTemp.getName(), Case.SENSITIVE);
                         if (openWeatherMap.getCity().getName().equals(place.getName().toString()) && cityRealms.count() == 0) {
                             realm.beginTransaction();
-                            cityRealmTemp.setDefault(true);
                             CityRealm cityRealm = realm.copyToRealmOrUpdate(cityRealmTemp);
-
-
-                            RealmResults<CityRealm> cityRealmRealmQuery = realm.where(CityRealm.class).findAll().where().equalTo("id", cityRealm.getId()).not().findAll();
-                            RealmList<CityRealm> cityRealms1 = new RealmList<CityRealm>();
-                            cityRealms1.addAll(cityRealmRealmQuery.subList(0, cityRealmRealmQuery.size()));
-                            for (int i = 0; i < cityRealms1.size(); i++) {
-                                cityRealms1.get(i).setDefault(false);
+                            if (sharedPreferenceDataManager != null) {
+                                sharedPreferenceDataManager.savePreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID, cityRealm.getId());
+                            } else {
+                                SharedPreferenceDataManager.getInstance(context).savePreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID, cityRealm.getId());
                             }
-
-
                             realm.commitTransaction();
 
                         } else {
