@@ -96,6 +96,7 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
 
             return true;
         } else if (id == R.id.action_add_current_city) {
+
             return true;
         }
 
@@ -125,17 +126,30 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
 
     @Override
     public void onCityAddedError(int errorFlag) {
+        String errorMesg = "";
+
         switch (errorFlag) {
             case AddCityActivityViewModel.FLAG_CITY_ALREADY_PRESENT:
-                Snackbar snackbar = Snackbar.make(activityAddCityBinding.coordinateLayout, "This city is already added", Snackbar.LENGTH_LONG);
-                snackbar.show();
+                errorMesg = "This city is already added";
+
                 break;
             case AddCityActivityViewModel.FLAG_CITY_SOMETHING_WENT_WRONG:
+                errorMesg = "Something went wrong please try again later";
+
                 break;
             case AddCityActivityViewModel.FLAG_CITY_WEATHER_NOT_AVAILABLE:
+                errorMesg = "Weather for this city is not available";
+
+                break;
+            case AddCityActivityViewModel.FLAG_CITY_NOT_FOUND:
+                errorMesg = "Weather for this city is not available";
+
                 break;
 
         }
+
+        Snackbar snackbar = Snackbar.make(activityAddCityBinding.coordinateLayout, errorMesg, Snackbar.LENGTH_LONG);
+        snackbar.show();
     }
 
     @Override

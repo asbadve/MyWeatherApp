@@ -39,7 +39,7 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
     private RealmResults<CityRealm> cityRealms;
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({FLAG_CITY_ALREADY_PRESENT, FLAG_CITY_WEATHER_NOT_AVAILABLE, FLAG_CITY_SOMETHING_WENT_WRONG})
+    @IntDef({FLAG_CITY_ALREADY_PRESENT, FLAG_CITY_WEATHER_NOT_AVAILABLE, FLAG_CITY_SOMETHING_WENT_WRONG,FLAG_CITY_NOT_FOUND})
     public @interface AddCityErrorFlag {
 
     }
@@ -49,6 +49,9 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
     public static final int FLAG_CITY_WEATHER_NOT_AVAILABLE = 2;
 
     public static final int FLAG_CITY_SOMETHING_WENT_WRONG = 3;
+
+    public static final int FLAG_CITY_NOT_FOUND = 4;
+
 
 
     @Override
@@ -128,25 +131,31 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
                     @Override
                     public void onNext(OpenWeatherMap openWeatherMap) {
                         Log.d(TAG, "onNext() called with: " + "openWeatherMap = [" + openWeatherMap + "]");
-                        Realm realm = Realm.getDefaultInstance();
-                        CityRealm cityRealmTemp = RealmUtil.getCityWithWeather(openWeatherMap);
-                        RealmQuery<CityRealm> cityRealms = realm.where(CityRealm.class).contains("name", cityRealmTemp.getName(), Case.SENSITIVE);
-                        if (openWeatherMap.getCity().getName().equals(place.getName().toString()) && cityRealms.count() == 0) {
-                            realm.beginTransaction();
-                            CityRealm cityRealm = realm.copyToRealmOrUpdate(cityRealmTemp);
-                            if (sharedPreferenceDataManager != null) {
-                                sharedPreferenceDataManager.savePreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID, cityRealm.getId());
+                        if (!openWeatherMap.getCod().equalsIgnoreCase("404")) {
+                            Realm realm = Realm.getDefaultInstance();
+                            CityRealm cityRealmTemp = RealmUtil.getCityWithWeather(openWeatherMap);
+                            RealmQuery<CityRealm> cityRealms = realm.where(CityRealm.class).contains("name", cityRealmTemp.getName(), Case.SENSITIVE);
+                            if (openWeatherMap.getCity().getName().equals(place.getName().toString()) && cityRealms.count() == 0) {
+                                realm.beginTransaction();
+                                CityRealm cityRealm = realm.copyToRealmOrUpdate(cityRealmTemp);
+                                if (sharedPreferenceDataManager != null) {
+                                    sharedPreferenceDataManager.savePreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID, cityRealm.getId());
+                                } else {
+                                    SharedPreferenceDataManager.getInstance(context).savePreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID, cityRealm.getId());
+                                }
+                                realm.commitTransaction();
+
                             } else {
-                                SharedPreferenceDataManager.getInstance(context).savePreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID, cityRealm.getId());
+                                if (cityRealms.count() > 0) {
+                                    activityModelCommunicationListener.onCityAddedError(FLAG_CITY_ALREADY_PRESENT);
+                                } else if (!openWeatherMap.getCity().getName().equals(place.getName().toString())) {
+                                    activityModelCommunicationListener.onCityAddedError(FLAG_CITY_WEATHER_NOT_AVAILABLE);
+                                }
                             }
-                            realm.commitTransaction();
 
                         } else {
-                            if (cityRealms.count() > 0) {
-                                activityModelCommunicationListener.onCityAddedError(FLAG_CITY_ALREADY_PRESENT);
-                            } else if (!openWeatherMap.getCity().getName().equals(place.getName().toString())) {
-                                activityModelCommunicationListener.onCityAddedError(FLAG_CITY_WEATHER_NOT_AVAILABLE);
-                            }
+                            activityModelCommunicationListener.onCityAddedError(FLAG_CITY_NOT_FOUND);
+
                         }
 
 
