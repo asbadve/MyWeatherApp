@@ -45,7 +45,7 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
 
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({FLAG_CITY_ALREADY_PRESENT, FLAG_CITY_WEATHER_NOT_AVAILABLE, FLAG_CITY_SOMETHING_WENT_WRONG, FLAG_CITY_NOT_FOUND,FLAG_CITY_NOT_MATCH})
+    @IntDef({FLAG_CITY_ALREADY_PRESENT, FLAG_CITY_WEATHER_NOT_AVAILABLE, FLAG_CITY_SOMETHING_WENT_WRONG, FLAG_CITY_NOT_FOUND, FLAG_CITY_NOT_MATCH})
     public @interface AddCityErrorFlag {
 
     }
@@ -60,7 +60,6 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
     public static final int FLAG_CITY_NOT_MATCH = 5;
 
 
-
     @Override
     public void onChange(RealmResults<CityRealm> element) {
         if (activityModelCommunicationListener != null) {
@@ -71,7 +70,7 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
     }
 
     public interface ActivityModelCommunicationListener {
-        void onCityAddedError(@AddCityErrorFlag int errorFlag,@Nullable String message);
+        void onCityAddedError(@AddCityErrorFlag int errorFlag, @Nullable String message);
 
         void onCityAdded(RealmResults<CityRealm> cityRealms, SharedPreferenceDataManager sharedPreferenceDataManager);
 
@@ -141,7 +140,7 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
                     public void onError(Throwable e) {
                         Log.d(TAG, "onError() called with: " + "e = [" + e + "]");
                         if (e != null) {
-                            activityModelCommunicationListener.onCityAddedError(FLAG_CITY_SOMETHING_WENT_WRONG,e.getMessage());
+                            activityModelCommunicationListener.onCityAddedError(FLAG_CITY_SOMETHING_WENT_WRONG, e.getMessage());
 
                         } else {
                             activityModelCommunicationListener.onCityAddedError(FLAG_CITY_SOMETHING_WENT_WRONG, null);
@@ -183,6 +182,83 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
 
                         }
 
+
+                    }
+                });
+
+    }
+
+
+    public void addCityByLatLong(double latitude, double longitude) {
+        if (subscription != null && !subscription.isUnsubscribed()) subscription.unsubscribe();
+        WeatherApplication weatherApplication = WeatherApplication.get(context);
+        OpenWeatherMapService openWeatherMapService = weatherApplication.getOpenWeatherMapService();
+        Map<String, String> queryParam = new HashMap<>();
+
+        queryParam.put("cnt", context.getString(R.string.cnt_parameter_for_days));
+        queryParam.put("APPID", context.getString(R.string.open_weather_map));
+        queryParam.put("units", context.getString(R.string.unit_param));
+
+
+        subscription = openWeatherMapService.getWeatherForecastByLatLong(String.valueOf(latitude), String.valueOf(longitude), queryParam)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(weatherApplication.defaultSubscribeScheduler())
+                .subscribe(new Subscriber<OpenWeatherMap>() {
+                    @Override
+                    public void onCompleted() {
+                        Log.d(TAG, "onCompleted() called with: " + "");
+                        progressVisibility.set(View.INVISIBLE);
+                        recyclerVisibility.set(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d(TAG, "onError() called with: " + "e = [" + e + "]");
+                        if (e != null) {
+                            activityModelCommunicationListener.onCityAddedError(FLAG_CITY_SOMETHING_WENT_WRONG, e.getMessage());
+
+                        } else {
+                            activityModelCommunicationListener.onCityAddedError(FLAG_CITY_SOMETHING_WENT_WRONG, null);
+
+                        }
+                        progressVisibility.set(View.INVISIBLE);
+                        recyclerVisibility.set(View.VISIBLE);
+
+                    }
+
+                    @Override
+                    public void onNext(OpenWeatherMap openWeatherMap) {
+
+
+                        if (!openWeatherMap.getCod().equalsIgnoreCase("404")) {
+                            Realm realm = Realm.getDefaultInstance();
+                            CityRealm cityRealmTemp = RealmUtil.getCityWithWeather(openWeatherMap);
+                            RealmQuery<CityRealm> cityRealms = realm.where(CityRealm.class).contains("name", cityRealmTemp.getName(), Case.SENSITIVE);
+                            if (cityRealms.count() == 0) {
+                                realm.beginTransaction();
+                                CityRealm cityRealm = realm.copyToRealmOrUpdate(cityRealmTemp);
+                                if (sharedPreferenceDataManager != null) {
+                                    sharedPreferenceDataManager.savePreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID, cityRealm.getId());
+                                    sharedPreferenceDataManager.savePreference(SharedPreferenceDataManager.FIREST_LAUCH, 2);
+
+                                } else {
+                                    sharedPreferenceDataManager = SharedPreferenceDataManager.getInstance(context);
+                                    sharedPreferenceDataManager.savePreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID, cityRealm.getId());
+                                    sharedPreferenceDataManager.savePreference(SharedPreferenceDataManager.FIREST_LAUCH, 2);
+                                }
+
+                                realm.commitTransaction();
+
+                            } else {
+                                if (cityRealms.count() > 0) {
+                                    activityModelCommunicationListener.onCityAddedError(AddCityActivityViewModel.FLAG_CITY_ALREADY_PRESENT, null);
+                                }
+                            }
+
+                        } else {
+                            activityModelCommunicationListener.onCityAddedError(AddCityActivityViewModel.FLAG_CITY_NOT_FOUND, null);
+
+                        }
 
                     }
                 });

@@ -13,6 +13,8 @@ import android.preference.PreferenceManager;
 public class SharedPreferenceDataManager {
     private static final String TAG = SharedPreferenceDataManager.class.getSimpleName();
     public static final String SF_KEY_DEFAULT_CITY_ID = "defaultCityId";
+    public static final String SF_KEY_PERMISSION_FINE_LOCATION = "isFineLocationPermissionGranted";
+    public static final String FIREST_LAUCH = "firstTimeLaunch";
     private Context context;
 
     public static final String SWAP_SELECTION = "swapOnOff";

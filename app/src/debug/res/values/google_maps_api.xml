@@ -4,10 +4,10 @@
 
     To get one, follow this link, follow the directions and press "Create" at the end:
 
-    https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend&keyType=CLIENT_SIDE_ANDROID&r=7B:08:42:94:EA:43:52:DF:7E:C7:12:55:B7:A0:F0:EB:1D:A1:41:BD%3Bcom.ajinkyabadve.weather.view
+    https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend&keyType=CLIENT_SIDE_ANDROID&r=7B:08:42:94:EA:43:52:DF:7E:C7:12:55:B7:A0:F0:EB:1D:A1:41:BD%3Bcom.ajinkyabadve.weather
 
     You can also add your credentials to an existing key, using this line:
-    7B:08:42:94:EA:43:52:DF:7E:C7:12:55:B7:A0:F0:EB:1D:A1:41:BD;com.ajinkyabadve.weather.view
+    7B:08:42:94:EA:43:52:DF:7E:C7:12:55:B7:A0:F0:EB:1D:A1:41:BD;com.ajinkyabadve.weather
 
     Alternatively, follow the directions here:
     https://developers.google.com/maps/documentation/android/start#get-key
@@ -15,7 +15,5 @@
     Once you have your key (it starts with "AIza"), replace the "google_maps_key"
     string in this file.
     -->
-    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">
-        AIzaSyAFWh6J4L9tHJlIUdQoRsWSRSwR4O5vkUY
-    </string>
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyAFWh6J4L9tHJlIUdQoRsWSRSwR4O5vkUY</string>
 </resources>

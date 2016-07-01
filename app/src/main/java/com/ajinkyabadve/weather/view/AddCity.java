@@ -1,10 +1,15 @@
 package com.ajinkyabadve.weather.view;
 
+import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
+import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,8 +24,12 @@ import com.ajinkyabadve.weather.model.realm.CityRealm;
 import com.ajinkyabadve.weather.util.SharedPreferenceDataManager;
 import com.ajinkyabadve.weather.view.adapter.CitiesAdapter;
 import com.ajinkyabadve.weather.viewmodel.AddCityActivityViewModel;
+import com.google.android.gms.awareness.Awareness;
+import com.google.android.gms.awareness.snapshot.LocationResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResolvingResultCallbacks;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
@@ -30,11 +39,13 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 
 public class AddCity extends AppCompatActivity implements AddCityActivityViewModel.ActivityModelCommunicationListener, CitiesAdapter.OnCityOperation {
+    private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 2;
     AddCityActivityViewModel addCityActivityViewModel;
 
     private static final int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private static final String TAG = AddCity.class.getSimpleName();
     ActivityAddCityBinding activityAddCityBinding;
+    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +55,10 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
         activityAddCityBinding.setAddcityciewcodel(addCityActivityViewModel);
         setSupportActionBar(activityAddCityBinding.toolbar);
         setUpRecyclerView(activityAddCityBinding.cities);
+        client = new GoogleApiClient.Builder(AddCity.this)
+                .addApi(Awareness.API)
+                .build();
+        client.connect();
     }
 
     private void setUpRecyclerView(RecyclerView recyclerView) {
@@ -99,11 +114,67 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
 
             return true;
         } else if (id == R.id.action_add_current_city) {
+            if (ActivityCompat.checkSelfPermission(AddCity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+
+                // Should we show an explanation?
+                if (ActivityCompat.shouldShowRequestPermissionRationale(AddCity.this,
+                        Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                    // Show an expanation to the user *asynchronously* -- don't block
+                    // this thread waiting for the user's response! After the user
+                    // sees the explanation, try again to request the permission.
+
+
+                } else {
+
+                    // No explanation needed, we can request the permission.
+
+                    ActivityCompat.requestPermissions(AddCity.this,
+                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                            MY_PERMISSIONS_REQUEST_FINE_LOCATION);
+
+                    // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                    // app-defined int constant. The callback method gets the
+                    // result of the request.
+                }
+            } else {
+                getCurrentLatLongAddCity();
+            }
+
 
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void getCurrentLatLongAddCity() {
+        Awareness.SnapshotApi.getLocation(client)
+                .setResultCallback(new ResolvingResultCallbacks<LocationResult>(AddCity.this, 5) {
+                    @Override
+                    public void onSuccess(@NonNull LocationResult locationResult) {
+                        Log.d(TAG, "onSuccess() called with: " + "locationResult = [" + locationResult + "]");
+                        Location location = locationResult.getLocation();
+                        double latitude = location.getLatitude();
+                        double longitude = location.getLongitude();
+                        addCityActivityViewModel.addCityByLatLong(latitude, longitude);
+
+
+                    }
+
+                    @Override
+                    public void onUnresolvableFailure(@NonNull Status status) {
+                        Log.d(TAG, "onUnresolvableFailure() called with: " + "status = [" + status + "]");
+
+                    }
+                });
     }
 
 
@@ -126,6 +197,30 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    getCurrentLatLongAddCity();
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+//                    if (sharedPreferenceDataManager != null) {
+//                        sharedPreferenceDataManager.savePreference(SharedPreferenceDataManager.SF_KEY_PERMISSION_FINE_LOCATION, false);
+//                    }
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
 
     @Override
     public void onCityAddedError(int errorFlag, String message) {

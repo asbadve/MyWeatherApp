@@ -7,6 +7,7 @@ import android.support.multidex.MultiDex;
 import com.ajinkyabadve.weather.JobSchedular.WeatherExactJob;
 import com.ajinkyabadve.weather.JobSchedular.WeatherJobCreator;
 import com.ajinkyabadve.weather.model.OpenWeatherMapService;
+import com.ajinkyabadve.weather.util.SharedPreferenceDataManager;
 import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
 
@@ -22,11 +23,16 @@ import rx.schedulers.Schedulers;
  */
 public class WeatherApplication extends Application {
     public Realm realm;
+    private SharedPreferenceDataManager sharedPreferenceDataManager;
 
     @Override
     public void onCreate() {
         super.onCreate();
-
+        sharedPreferenceDataManager = SharedPreferenceDataManager.getInstance(this);
+        int firstLunch = sharedPreferenceDataManager.getSavedIntPreference(SharedPreferenceDataManager.FIREST_LAUCH);
+        if (firstLunch == 0) {
+            sharedPreferenceDataManager.savePreference(SharedPreferenceDataManager.FIREST_LAUCH, 1);
+        }
 
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this)
                 .build();

@@ -25,6 +25,8 @@ public interface OpenWeatherMapService {
     @GET("daily")
     Observable<OpenWeatherMap> getWeatherForeCastByCity(@Query("q") String city, @QueryMap Map<String, String> options);
 
+    @GET("daily")
+    Observable<OpenWeatherMap> getWeatherForecastByLatLong(@Query("lat") String lat,@Query("lon") String lon, @QueryMap Map<String, String> options);
 
     //https://maps.googleapis.com/maps/api/place/autocomplete/json?input=Pune&types=(cities)&sensor=false&key=AIzaSyAkpLDW9FyaYi5qKyTfl1x1115BoMZGm1I
     public static final String BASE_URL_LOCATION = "https://maps.googleapis.com/maps/api/place/autocomplete/";

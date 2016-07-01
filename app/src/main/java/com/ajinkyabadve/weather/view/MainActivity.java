@@ -1,8 +1,17 @@
 package com.ajinkyabadve.weather.view;
 
+import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
+import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,7 +26,13 @@ import com.ajinkyabadve.weather.model.realm.ListRealm;
 import com.ajinkyabadve.weather.util.SharedPreferenceDataManager;
 import com.ajinkyabadve.weather.util.Util;
 import com.ajinkyabadve.weather.view.adapter.ListAdapter;
+import com.ajinkyabadve.weather.viewmodel.AddCityActivityViewModel;
 import com.ajinkyabadve.weather.viewmodel.MainViewModel;
+import com.google.android.gms.awareness.Awareness;
+import com.google.android.gms.awareness.snapshot.LocationResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResolvingResultCallbacks;
+import com.google.android.gms.common.api.Status;
 
 import java.util.Date;
 
@@ -29,14 +44,17 @@ import io.realm.RealmResults;
 /**
  * test
  */
-public class MainActivity extends AppCompatActivity implements RealmChangeListener<RealmResults<CityRealm>>, MainViewModel.OnDialogShow {
+public class MainActivity extends AppCompatActivity implements RealmChangeListener<RealmResults<CityRealm>>, MainViewModel.OnDialogShow, MainViewModel.onCityAddeByLatLong {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
+    private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 2;
     private MainViewModel mainViewModel;
     ActivityMainBinding activityMainBinding;
 
     Realm realm;
     private RealmResults<CityRealm> resultRealmResults;
+    private GoogleApiClient client;
+    private SharedPreferenceDataManager sharedPreferenceDataManager;
 
     @Override
     protected void onStart() {
@@ -56,10 +74,18 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        mainViewModel = new MainViewModel(MainActivity.this, this);
+        mainViewModel = new MainViewModel(MainActivity.this, this, this);
         activityMainBinding.setViewModel(mainViewModel);
         setSupportActionBar(activityMainBinding.toolbar);
         setWeatherRecyclerView(activityMainBinding.weather);
+        client = new GoogleApiClient.Builder(MainActivity.this)
+                .addApi(Awareness.API)
+                .build();
+        client.connect();
+        int permissionCheck = ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+        sharedPreferenceDataManager = SharedPreferenceDataManager.getInstance(MainActivity.this);
+
     }
 
     private void setWeatherRecyclerView(RecyclerView recyclerView) {
@@ -94,14 +120,13 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
     public void onChange(RealmResults<CityRealm> element) {
         Log.d(TAG, "onChange() called with: " + "element = [" + element + "]");
         if (element.size() > 0) {
-            SharedPreferenceDataManager instance = SharedPreferenceDataManager.getInstance(MainActivity.this);
-            int cityIdPreference = instance.getSavedDefaultCityIdPreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID);
+            int cityIdPreference = sharedPreferenceDataManager.getSavedDefaultCityIdPreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID);
             CityRealm cityRealm = null;
             if (cityIdPreference != 0) {
                 cityRealm = element.where().equalTo("id", cityIdPreference).findFirst();
                 if (cityRealm == null) {
                     cityRealm = element.where().findFirst();
-                    instance.savePreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID, cityRealm.getId());
+                    sharedPreferenceDataManager.savePreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID, cityRealm.getId());
                 }
             } else {
                 cityRealm = element.where().findFirst();
@@ -140,13 +165,160 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
     }
 
     @Override
-    public void onAddCityDialogShow() {
+    public void onAddCityDialogShow(boolean showDialog) {
+        if (showDialog) {
+            AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this)
+                    .setMessage(MainActivity.this.getResources().getString(R.string.add_city_manualy_current_location))
+                    .setPositiveButton(R.string.ok_string, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
 
-        startActivity(new Intent(MainActivity.this, AddCity.class));
+                            if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                                // TODO: Consider calling
+                                //    ActivityCompat#requestPermissions
+                                // here to request the missing permissions, and then overriding
+                                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                //                                          int[] grantResults)
+                                // to handle the case where the user grants the permission. See the documentation
+                                // for ActivityCompat#requestPermissions for more details.
+
+                                // Should we show an explanation?
+                                if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                                        Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                                    // Show an expanation to the user *asynchronously* -- don't block
+                                    // this thread waiting for the user's response! After the user
+                                    // sees the explanation, try again to request the permission.
+
+
+                                } else {
+
+                                    // No explanation needed, we can request the permission.
+
+                                    ActivityCompat.requestPermissions(MainActivity.this,
+                                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                            MY_PERMISSIONS_REQUEST_FINE_LOCATION);
+
+                                    // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                                    // app-defined int constant. The callback method gets the
+                                    // result of the request.
+                                }
+                                return;
+                            } else {
+                                getCurrentLatLong();
+                            }
+
+
+                        }
+                    })
+                    .setNegativeButton(R.string.no_string, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            sharedPreferenceDataManager.savePreference(SharedPreferenceDataManager.FIREST_LAUCH, 2);
+                            startActivity(new Intent(MainActivity.this, AddCity.class));
+                        }
+                    })
+                    .create();
+            alertDialog.show();
+        } else {
+            startActivity(new Intent(MainActivity.this, AddCity.class));
+
+        }
 
 
 //        FragmentManager fm = getSupportFragmentManager();
 //        AddCityDialogFragment addCityDialogFragment = AddCityDialogFragment.newInstance("Some Title");
 //        addCityDialogFragment.show(fm, "fragment_edit_name");
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    getCurrentLatLong();
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+//                    if (sharedPreferenceDataManager != null) {
+//                        sharedPreferenceDataManager.savePreference(SharedPreferenceDataManager.SF_KEY_PERMISSION_FINE_LOCATION, false);
+//                    }
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
+
+    private void getCurrentLatLong() {
+        Awareness.SnapshotApi.getLocation(client)
+                .setResultCallback(new ResolvingResultCallbacks<LocationResult>(MainActivity.this, 5) {
+                    @Override
+                    public void onSuccess(@NonNull LocationResult locationResult) {
+                        Log.d(TAG, "onSuccess() called with: " + "locationResult = [" + locationResult + "]");
+                        Location location = locationResult.getLocation();
+                        double latitude = location.getLatitude();
+                        double longitude = location.getLongitude();
+                        mainViewModel.addCityByLatLong(latitude, longitude);
+
+
+                    }
+
+                    @Override
+                    public void onUnresolvableFailure(@NonNull Status status) {
+                        Log.d(TAG, "onUnresolvableFailure() called with: " + "status = [" + status + "]");
+
+                    }
+                });
+    }
+
+    @Override
+    public void onCityAddedByLatLong() {
+
+    }
+
+    @Override
+    public void onCityAddedError(@AddCityActivityViewModel.AddCityErrorFlag int errorFlag, String message) {
+
+        String errorMesg = "";
+
+        switch (errorFlag) {
+            case AddCityActivityViewModel.FLAG_CITY_ALREADY_PRESENT:
+                errorMesg = "This city is already added";
+
+                break;
+            case AddCityActivityViewModel.FLAG_CITY_SOMETHING_WENT_WRONG:
+                if (message != null) {
+                    errorMesg = message;
+                } else {
+                    errorMesg = "Something went wrong please try again later";
+                }
+
+                break;
+            case AddCityActivityViewModel.FLAG_CITY_WEATHER_NOT_AVAILABLE:
+                errorMesg = "Weather for this city is not available";
+
+                break;
+            case AddCityActivityViewModel.FLAG_CITY_NOT_FOUND:
+                errorMesg = "Weather for this city is not available";
+
+                break;
+            case AddCityActivityViewModel.FLAG_CITY_NOT_MATCH:
+                errorMesg = "City name not match";
+                break;
+
+        }
+
+        Snackbar snackbar = Snackbar.make(activityMainBinding.coordinateLayout, errorMesg, Snackbar.LENGTH_LONG);
+        snackbar.show();
+
     }
 }
