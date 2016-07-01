@@ -93,6 +93,8 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
     }
 
 
+
+
     @Override
     public void Stop() {
         cityRealms.removeChangeListener(this);

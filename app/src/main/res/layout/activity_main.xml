@@ -27,6 +27,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
+                app:layout_scrollFlags="scroll|enterAlways|snap"
                 app:popupTheme="@style/AppTheme.PopupOverlay" />
 
         </android.support.design.widget.AppBarLayout>
@@ -36,6 +37,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            app:layout_anchorGravity="center|bottom"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
             <android.support.v7.widget.RecyclerView
@@ -52,7 +54,8 @@
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/fab_margin"
             android:onClick="@{viewModel.onFabClick}"
-            android:src="@android:drawable/ic_dialog_email" />
+            android:src="@drawable/ic_action_add_city"
+            app:layout_behavior="com.ajinkyabadve.weather.view.behaviour.ScrollAwareFABBehavior" />
 
     </android.support.design.widget.CoordinatorLayout>
 </layout>

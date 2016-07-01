@@ -18,18 +18,22 @@ import io.realm.RealmResults;
  */
 public class CitiesAdapter extends RecyclerView.Adapter<CitiesAdapter.CitiesViewHolder> {
     RealmResults<CityRealm> cityRealms;
-    private OnCitySelected onCitySelected;
+    private OnCityOperation onCityOperation;
 
     public interface OnItemClick {
         void OnCitySelected(CityRealm cityRealm);
+        void OnCityDeletedFromAdapter(CityRealm cityRealm);
+
     }
 
-    public interface OnCitySelected {
+    public interface OnCityOperation {
         void OnCitySelectedFromAdapter(CityRealm cityRealm);
+
+        void OnCityDeleted(CityRealm cityRealm);
     }
 
-    public CitiesAdapter(OnCitySelected OnCitySelected) {
-        this.onCitySelected = OnCitySelected;
+    public CitiesAdapter(OnCityOperation OnCityOperation) {
+        this.onCityOperation = OnCityOperation;
     }
 
     public void setCityRealms(RealmResults<CityRealm> cityRealms) {
@@ -44,7 +48,7 @@ public class CitiesAdapter extends RecyclerView.Adapter<CitiesAdapter.CitiesView
                 R.layout.item_city,
                 parent,
                 false);
-        return new CitiesViewHolder(itemCityBinding, onCitySelected);
+        return new CitiesViewHolder(itemCityBinding, onCityOperation);
     }
 
     @Override
@@ -61,12 +65,12 @@ public class CitiesAdapter extends RecyclerView.Adapter<CitiesAdapter.CitiesView
 
     public static class CitiesViewHolder extends RecyclerView.ViewHolder implements OnItemClick {
         final ItemCityBinding itemCityBinding;
-        private OnCitySelected onCitySelected;
+        private OnCityOperation onCityOperation;
 
-        public CitiesViewHolder(ItemCityBinding itemCityBinding, OnCitySelected onCitySelected) {
+        public CitiesViewHolder(ItemCityBinding itemCityBinding, OnCityOperation onCityOperation) {
             super(itemCityBinding.rootView);
             this.itemCityBinding = itemCityBinding;
-            this.onCitySelected = onCitySelected;
+            this.onCityOperation = onCityOperation;
         }
 
         void bindCity(CityRealm cityRealm) {
@@ -79,7 +83,12 @@ public class CitiesAdapter extends RecyclerView.Adapter<CitiesAdapter.CitiesView
 
         @Override
         public void OnCitySelected(CityRealm cityRealm) {
-            onCitySelected.OnCitySelectedFromAdapter(cityRealm);
+            onCityOperation.OnCitySelectedFromAdapter(cityRealm);
+        }
+
+        @Override
+        public void OnCityDeletedFromAdapter(CityRealm cityRealm) {
+            onCityOperation.OnCityDeleted(cityRealm);
         }
     }
 

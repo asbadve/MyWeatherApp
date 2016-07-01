@@ -9,7 +9,6 @@ import com.ajinkyabadve.weather.util.SharedPreferenceDataManager;
 import com.ajinkyabadve.weather.view.adapter.CitiesAdapter;
 
 import io.realm.Realm;
-import io.realm.RealmResults;
 
 /**
  * Created by Ajinkya on 29/06/2016.
@@ -62,7 +61,20 @@ public class ItemCityViewModel extends BaseObservable implements ViewModel {
 
     }
 
+    public void onItemDeleteClick(View view) {
+//        Realm realm = Realm.getDefaultInstance();
+//        realm.beginTransaction();
+//        cityRealm.deleteFromRealm();
+//        realm.commitTransaction();
+        onItemClick.OnCityDeletedFromAdapter(cityRealm);
+        defaultId = sharedPreferenceDataManager.getSavedDefaultCityIdPreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID);
+//        notifyAll();
+
+//
+    }
+
     public boolean isDefaultCity() {
+        defaultId = sharedPreferenceDataManager.getSavedDefaultCityIdPreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID);
         return (defaultId == cityRealm.getId());
     }
 

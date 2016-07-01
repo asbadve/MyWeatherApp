@@ -17,12 +17,19 @@
 
     <LinearLayout
         android:id="@+id/rootView"
+        android:gravity="center_vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="@{viewModel.onItemClick}"
         android:orientation="horizontal">
 
-
+        <ImageView
+            android:id="@+id/imageView"
+            android:visibility="@{viewModel.defaultCity ? View.VISIBLE : View.INVISIBLE}"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_action_default_selected"
+            android:layout_margin="10dp" />
         <TextView
             android:id="@+id/textView"
             android:layout_width="0dp"
@@ -34,12 +41,15 @@
             tools:text="city Name" />
 
         <ImageView
-            android:id="@+id/imageView"
-            android:visibility="@{viewModel.defaultCity ? View.VISIBLE : View.INVISIBLE}"
+            android:id="@+id/imageViewDelete"
+            android:onClick="@{viewModel.onItemDeleteClick}"
             android:layout_width="wrap_content"
+            android:padding="10dp"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_action_default_selected"
+            android:src="@drawable/ic_action_delete"
             android:layout_margin="10dp" />
+
+
 
         <!--<FrameLayout-->
         <!--android:layout_width="match_parent"-->

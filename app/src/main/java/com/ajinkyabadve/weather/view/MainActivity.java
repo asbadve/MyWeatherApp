@@ -19,7 +19,6 @@ import com.ajinkyabadve.weather.util.Util;
 import com.ajinkyabadve.weather.view.adapter.ListAdapter;
 import com.ajinkyabadve.weather.viewmodel.MainViewModel;
 
-import java.util.Calendar;
 import java.util.Date;
 
 import io.realm.Realm;
@@ -95,11 +94,15 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
     public void onChange(RealmResults<CityRealm> element) {
         Log.d(TAG, "onChange() called with: " + "element = [" + element + "]");
         if (element.size() > 0) {
-
-            int cityIdPreference = SharedPreferenceDataManager.getInstance(MainActivity.this).getSavedDefaultCityIdPreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID);
+            SharedPreferenceDataManager instance = SharedPreferenceDataManager.getInstance(MainActivity.this);
+            int cityIdPreference = instance.getSavedDefaultCityIdPreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID);
             CityRealm cityRealm = null;
             if (cityIdPreference != 0) {
                 cityRealm = element.where().equalTo("id", cityIdPreference).findFirst();
+                if (cityRealm == null) {
+                    cityRealm = element.where().findFirst();
+                    instance.savePreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID, cityRealm.getId());
+                }
             } else {
                 cityRealm = element.where().findFirst();
             }
@@ -125,6 +128,13 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
                 }
             }
 
+
+        } else {
+            ListAdapter listAdapter = (ListAdapter) activityMainBinding.weather.getAdapter();
+            if (listAdapter != null) {
+                listAdapter.setList(null);
+                listAdapter.notifyDataSetChanged();
+            }
 
         }
     }

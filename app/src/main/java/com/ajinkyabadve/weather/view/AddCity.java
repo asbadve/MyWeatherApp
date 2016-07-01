@@ -1,9 +1,11 @@
 package com.ajinkyabadve.weather.view;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -24,9 +26,10 @@ import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 
+import io.realm.Realm;
 import io.realm.RealmResults;
 
-public class AddCity extends AppCompatActivity implements AddCityActivityViewModel.ActivityModelCommunicationListener, CitiesAdapter.OnCitySelected {
+public class AddCity extends AppCompatActivity implements AddCityActivityViewModel.ActivityModelCommunicationListener, CitiesAdapter.OnCityOperation {
     AddCityActivityViewModel addCityActivityViewModel;
 
     private static final int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
@@ -163,5 +166,32 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
     @Override
     public void OnCitySelectedFromAdapter(CityRealm cityRealm) {
         finish();
+    }
+
+    @Override
+    public void OnCityDeleted(final CityRealm cityRealm) {
+        AlertDialog alertDialog = new AlertDialog.Builder(AddCity.this)
+                .setMessage(AddCity.this.getResources().getString(R.string.cofirmation_city_delete_messege) + " " + cityRealm.getName())
+                .setPositiveButton(R.string.ok_string, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        Realm realm = Realm.getDefaultInstance();
+                        realm.beginTransaction();
+                        realm.where(CityRealm.class).equalTo("id", cityRealm.getId()).findFirst().deleteFromRealm();
+                        realm.commitTransaction();
+
+                    }
+                })
+                .setNegativeButton(R.string.no_string, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                })
+                .create();
+        alertDialog.show();
+
+
     }
 }
