@@ -128,7 +128,7 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
 
 
     @Override
-    public void onCityAddedError(int errorFlag) {
+    public void onCityAddedError(int errorFlag, String message) {
         String errorMesg = "";
 
         switch (errorFlag) {
@@ -137,7 +137,11 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
 
                 break;
             case AddCityActivityViewModel.FLAG_CITY_SOMETHING_WENT_WRONG:
-                errorMesg = "Something went wrong please try again later";
+                if (message != null) {
+                    errorMesg = message;
+                } else {
+                    errorMesg = "Something went wrong please try again later";
+                }
 
                 break;
             case AddCityActivityViewModel.FLAG_CITY_WEATHER_NOT_AVAILABLE:
@@ -147,6 +151,9 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
             case AddCityActivityViewModel.FLAG_CITY_NOT_FOUND:
                 errorMesg = "Weather for this city is not available";
 
+                break;
+            case AddCityActivityViewModel.FLAG_CITY_NOT_MATCH:
+                errorMesg = "City name not match";
                 break;
 
         }
