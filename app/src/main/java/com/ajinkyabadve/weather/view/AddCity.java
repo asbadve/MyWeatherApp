@@ -5,6 +5,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -17,11 +19,13 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.ajinkyabadve.weather.R;
 import com.ajinkyabadve.weather.databinding.ActivityAddCityBinding;
 import com.ajinkyabadve.weather.model.realm.CityRealm;
 import com.ajinkyabadve.weather.util.SharedPreferenceDataManager;
+import com.ajinkyabadve.weather.util.Util;
 import com.ajinkyabadve.weather.view.adapter.CitiesAdapter;
 import com.ajinkyabadve.weather.viewmodel.AddCityActivityViewModel;
 import com.google.android.gms.awareness.Awareness;
@@ -34,6 +38,10 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -130,6 +138,9 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
                     // Show an expanation to the user *asynchronously* -- don't block
                     // this thread waiting for the user's response! After the user
                     // sees the explanation, try again to request the permission.
+                    ActivityCompat.requestPermissions(AddCity.this,
+                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                            MY_PERMISSIONS_REQUEST_FINE_LOCATION);
 
 
                 } else {
@@ -139,6 +150,7 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
                     ActivityCompat.requestPermissions(AddCity.this,
                             new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                             MY_PERMISSIONS_REQUEST_FINE_LOCATION);
+
 
                     // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
                     // app-defined int constant. The callback method gets the
@@ -155,16 +167,46 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
         return super.onOptionsItemSelected(item);
     }
 
+    @SuppressWarnings({"MissingPermission"})
     private void getCurrentLatLongAddCity() {
+        addCityActivityViewModel.showProgressBar();
         Awareness.SnapshotApi.getLocation(client)
                 .setResultCallback(new ResolvingResultCallbacks<LocationResult>(AddCity.this, 5) {
                     @Override
                     public void onSuccess(@NonNull LocationResult locationResult) {
                         Log.d(TAG, "onSuccess() called with: " + "locationResult = [" + locationResult + "]");
+
+                        if (!locationResult.getStatus().isSuccess()) {
+                            Log.e(TAG, "Could not get location.");
+                            if (!Util.isGpsEnable(AddCity.this)) {
+                                Snackbar snackbar = Snackbar.make(activityAddCityBinding.coordinateLayout, "Please turn on the gps", Snackbar.LENGTH_LONG);
+                                snackbar.show();
+                            } else {
+                                Snackbar snackbar = Snackbar.make(activityAddCityBinding.coordinateLayout, "Could not get location", Snackbar.LENGTH_LONG);
+                                snackbar.show();
+                            }
+                            return;
+                        }
                         Location location = locationResult.getLocation();
                         double latitude = location.getLatitude();
                         double longitude = location.getLongitude();
-                        addCityActivityViewModel.addCityByLatLong(latitude, longitude);
+                        Geocoder geocoder = new Geocoder(AddCity.this, Locale.getDefault());
+                        List<Address> addresses = null;
+                        try {
+                            addresses = geocoder.getFromLocation(latitude, longitude, 1);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        if (addresses != null) {
+                            String cityName = addresses.get(0).getAddressLine(0);
+                            String stateName = addresses.get(0).getAddressLine(1);
+                            String countryName = addresses.get(0).getAddressLine(2);
+                            String locality = addresses.get(0).getLocality();
+                            addCityActivityViewModel.checkIfPlaceIsValid(locality);
+
+                        } else {
+                            addCityActivityViewModel.addCityByLatLong(latitude, longitude);
+                        }
 
 
                     }
@@ -172,6 +214,17 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
                     @Override
                     public void onUnresolvableFailure(@NonNull Status status) {
                         Log.d(TAG, "onUnresolvableFailure() called with: " + "status = [" + status + "]");
+                        addCityActivityViewModel.hideProgressBar();
+                        if (status != null) {
+                            //the documentation is unavailable for status code.
+                            int statusCode = status.getStatusCode();
+                        }
+
+                        if (!Util.isGpsEnable(AddCity.this)) {
+                            Snackbar snackbar = Snackbar.make(activityAddCityBinding.coordinateLayout, "Please turn on the gps", Snackbar.LENGTH_LONG);
+                            snackbar.show();
+                        }
+
 
                     }
                 });
@@ -184,7 +237,7 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
             if (resultCode == RESULT_OK) {
                 Place place = PlaceAutocomplete.getPlace(this, data);
                 Log.i(TAG, "Place: " + place.getName());
-                addCityActivityViewModel.checkIfPlaceIsValid(place);
+                addCityActivityViewModel.checkIfPlaceIsValid(place.getName().toString());
 
 
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
@@ -208,9 +261,12 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
                     // contacts-related task you need to do.
                     getCurrentLatLongAddCity();
                 } else {
+
+                    Snackbar snackbar = Snackbar.make(activityAddCityBinding.coordinateLayout, "Please turn on location permission from setting", Snackbar.LENGTH_LONG);
+                    snackbar.show();
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
-//                    if (sharedPreferenceDataManager != null) {
+//                    if (sharedPreferenceDataManager != null) {// TODO: 02/07/2016
 //                        sharedPreferenceDataManager.savePreference(SharedPreferenceDataManager.SF_KEY_PERMISSION_FINE_LOCATION, false);
 //                    }
                 }
@@ -225,7 +281,12 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
     @Override
     public void onCityAddedError(int errorFlag, String message) {
         String errorMesg = "";
+        errorMesg = getString(errorFlag, message, errorMesg);
+        Snackbar snackbar = Snackbar.make(activityAddCityBinding.coordinateLayout, errorMesg, Snackbar.LENGTH_LONG);
+        snackbar.show();
+    }
 
+    private String getString(int errorFlag, String message, String errorMesg) {
         switch (errorFlag) {
             case AddCityActivityViewModel.FLAG_CITY_ALREADY_PRESENT:
                 errorMesg = "This city is already added";
@@ -247,14 +308,16 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
                 errorMesg = "Weather for this city is not available";
 
                 break;
+            case AddCityActivityViewModel.FLAG_INTERNET_NOT_AVAILABLE:
+                errorMesg = "No connection";
+
+                break;
             case AddCityActivityViewModel.FLAG_CITY_NOT_MATCH:
                 errorMesg = "City name not match";
                 break;
 
         }
-
-        Snackbar snackbar = Snackbar.make(activityAddCityBinding.coordinateLayout, errorMesg, Snackbar.LENGTH_LONG);
-        snackbar.show();
+        return errorMesg;
     }
 
     @Override
@@ -295,5 +358,15 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
         alertDialog.show();
 
 
+    }
+
+    public void showProgressBar() {
+        activityAddCityBinding.cities.setVisibility(View.INVISIBLE);
+        activityAddCityBinding.progressBar.setVisibility(View.VISIBLE);
+    }
+
+    public void hideProgressBar() {
+        activityAddCityBinding.cities.setVisibility(View.VISIBLE);
+        activityAddCityBinding.progressBar.setVisibility(View.INVISIBLE);
     }
 }

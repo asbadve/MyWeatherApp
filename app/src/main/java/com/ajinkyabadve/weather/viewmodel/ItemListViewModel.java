@@ -2,11 +2,9 @@ package com.ajinkyabadve.weather.viewmodel;
 
 import android.content.Context;
 import android.databinding.BaseObservable;
-import android.databinding.BindingAdapter;
-import android.widget.ImageView;
 
-import com.ajinkyabadve.weather.util.Util;
 import com.ajinkyabadve.weather.model.realm.ListRealm;
+import com.ajinkyabadve.weather.util.Util;
 
 /**
  * Created by Ajinkya on 29/06/2016.
@@ -40,7 +38,9 @@ public class ItemListViewModel extends BaseObservable implements ViewModel {
         return Util.getIconResourceForWeatherCondition(listRealm.getWeatherRealm().get(0).getId());
     }
 
-
+    public int getWeatherImageForToday() {
+        return Util.getArtResourceForWeatherCondition(listRealm.getWeatherRealm().get(0).getId());
+    }
 
 
     @Override

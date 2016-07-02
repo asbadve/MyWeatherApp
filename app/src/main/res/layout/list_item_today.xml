@@ -46,7 +46,7 @@
             <ImageView
                 android:id="@+id/list_item_icon"
                 android:layout_width="0dp"
-                android:src="@{viewModel.weatherImage}"
+                android:src="@{viewModel.weatherImageForToday}"
                 android:adjustViewBounds="true"
                 android:maxHeight="96dp"
                 android:maxWidth="96dp"

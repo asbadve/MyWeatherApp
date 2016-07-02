@@ -5,6 +5,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -26,6 +28,7 @@ import com.ajinkyabadve.weather.model.realm.ListRealm;
 import com.ajinkyabadve.weather.util.SharedPreferenceDataManager;
 import com.ajinkyabadve.weather.util.Util;
 import com.ajinkyabadve.weather.view.adapter.ListAdapter;
+import com.ajinkyabadve.weather.view.adapter.SimpleDividerItemDecoration;
 import com.ajinkyabadve.weather.viewmodel.AddCityActivityViewModel;
 import com.ajinkyabadve.weather.viewmodel.MainViewModel;
 import com.google.android.gms.awareness.Awareness;
@@ -34,7 +37,10 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResolvingResultCallbacks;
 import com.google.android.gms.common.api.Status;
 
+import java.io.IOException;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
@@ -90,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
 
     private void setWeatherRecyclerView(RecyclerView recyclerView) {
         ListAdapter listAdapter = new ListAdapter();
+        recyclerView.addItemDecoration(new SimpleDividerItemDecoration(MainActivity.this));
         recyclerView.setAdapter(listAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
@@ -98,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+        return false;
     }
 
     @Override
@@ -258,16 +265,47 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
         }
     }
 
+    @SuppressWarnings({"MissingPermission"})
     private void getCurrentLatLong() {
+        mainViewModel.showProgressBar();
         Awareness.SnapshotApi.getLocation(client)
                 .setResultCallback(new ResolvingResultCallbacks<LocationResult>(MainActivity.this, 5) {
                     @Override
                     public void onSuccess(@NonNull LocationResult locationResult) {
                         Log.d(TAG, "onSuccess() called with: " + "locationResult = [" + locationResult + "]");
+                        if (!locationResult.getStatus().isSuccess()) {
+                            Log.e(TAG, "Could not get location.");
+                            if (!Util.isGpsEnable(MainActivity.this)) {
+                                Snackbar snackbar = Snackbar.make(activityMainBinding.coordinateLayout, "Please turn on the gps", Snackbar.LENGTH_LONG);
+                                snackbar.show();
+                            } else {
+                                Snackbar snackbar = Snackbar.make(activityMainBinding.coordinateLayout, "Could not get location", Snackbar.LENGTH_LONG);
+                                snackbar.show();
+                            }
+                            return;
+                        }
                         Location location = locationResult.getLocation();
                         double latitude = location.getLatitude();
                         double longitude = location.getLongitude();
-                        mainViewModel.addCityByLatLong(latitude, longitude);
+
+                        Geocoder geocoder = new Geocoder(MainActivity.this, Locale.getDefault());
+                        List<Address> addresses = null;
+                        try {
+                            addresses = geocoder.getFromLocation(latitude, longitude, 1);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        if (addresses != null) {
+                            String cityName = addresses.get(0).getAddressLine(0);
+                            String stateName = addresses.get(0).getAddressLine(1);
+                            String countryName = addresses.get(0).getAddressLine(2);
+                            String locality = addresses.get(0).getLocality();
+                            mainViewModel.checkIfPlaceIsValid(locality);
+
+                        } else {
+                            mainViewModel.addCityByLatLong(latitude, longitude);
+
+                        }
 
 
                     }
@@ -275,6 +313,18 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
                     @Override
                     public void onUnresolvableFailure(@NonNull Status status) {
                         Log.d(TAG, "onUnresolvableFailure() called with: " + "status = [" + status + "]");
+                        mainViewModel.hideProgressBar();
+
+                        if (status != null) {
+                            //the documentation is unavailable for status code.
+                            int statusCode = status.getStatusCode();
+                        }
+
+                        if (!Util.isGpsEnable(MainActivity.this)) {
+                            Snackbar snackbar = Snackbar.make(activityMainBinding.coordinateLayout, "Please turn on the gps", Snackbar.LENGTH_LONG);
+                            snackbar.show();
+                        }
+
 
                     }
                 });
@@ -287,9 +337,14 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
 
     @Override
     public void onCityAddedError(@AddCityActivityViewModel.AddCityErrorFlag int errorFlag, String message) {
-
         String errorMesg = "";
+        errorMesg = getErrorString(errorFlag, message, errorMesg);
+        Snackbar snackbar = Snackbar.make(activityMainBinding.coordinateLayout, errorMesg, Snackbar.LENGTH_LONG);
+        snackbar.show();
 
+    }
+
+    private String getErrorString(@AddCityActivityViewModel.AddCityErrorFlag int errorFlag, String message, String errorMesg) {
         switch (errorFlag) {
             case AddCityActivityViewModel.FLAG_CITY_ALREADY_PRESENT:
                 errorMesg = "This city is already added";
@@ -311,14 +366,15 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
                 errorMesg = "Weather for this city is not available";
 
                 break;
+            case AddCityActivityViewModel.FLAG_INTERNET_NOT_AVAILABLE:
+                errorMesg = "No connection";
+
+                break;
             case AddCityActivityViewModel.FLAG_CITY_NOT_MATCH:
                 errorMesg = "City name not match";
                 break;
 
         }
-
-        Snackbar snackbar = Snackbar.make(activityMainBinding.coordinateLayout, errorMesg, Snackbar.LENGTH_LONG);
-        snackbar.show();
-
+        return errorMesg;
     }
 }

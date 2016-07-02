@@ -14,6 +14,7 @@ import com.ajinkyabadve.weather.model.OpenWeatherMapService;
 import com.ajinkyabadve.weather.model.realm.CityRealm;
 import com.ajinkyabadve.weather.model.realm.RealmUtil;
 import com.ajinkyabadve.weather.util.SharedPreferenceDataManager;
+import com.ajinkyabadve.weather.util.Util;
 import com.google.android.gms.location.places.Place;
 
 import java.lang.annotation.Retention;
@@ -43,9 +44,19 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
     private RealmResults<CityRealm> cityRealms;
     public ObservableInt recyclerVisibility;
 
+    public void showProgressBar() {
+        recyclerVisibility.set(View.INVISIBLE);
+        progressVisibility.set(View.VISIBLE);
+    }
+
+    public void hideProgressBar() {
+        progressVisibility.set(View.INVISIBLE);
+        recyclerVisibility.set(View.VISIBLE);
+    }
+
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({FLAG_CITY_ALREADY_PRESENT, FLAG_CITY_WEATHER_NOT_AVAILABLE, FLAG_CITY_SOMETHING_WENT_WRONG, FLAG_CITY_NOT_FOUND, FLAG_CITY_NOT_MATCH})
+    @IntDef({FLAG_CITY_ALREADY_PRESENT, FLAG_CITY_WEATHER_NOT_AVAILABLE, FLAG_CITY_SOMETHING_WENT_WRONG, FLAG_CITY_NOT_FOUND, FLAG_CITY_NOT_MATCH, FLAG_INTERNET_NOT_AVAILABLE})
     public @interface AddCityErrorFlag {
 
     }
@@ -58,6 +69,7 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
 
     public static final int FLAG_CITY_NOT_FOUND = 4;
     public static final int FLAG_CITY_NOT_MATCH = 5;
+    public static final int FLAG_INTERNET_NOT_AVAILABLE = 6;
 
 
     @Override
@@ -109,9 +121,9 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
     /**
      * Validate the place form autocomplete api
      *
-     * @param place
+     * @param cityName
      */
-    public void checkIfPlaceIsValid(final Place place) {
+    public void checkIfPlaceIsValid(String cityName) {
         recyclerVisibility.set(View.INVISIBLE);
         progressVisibility.set(View.VISIBLE);
         if (subscription != null && !subscription.isUnsubscribed()) subscription.unsubscribe();
@@ -121,9 +133,8 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
         queryParam.put("cnt", context.getString(R.string.cnt_parameter_for_days));
         queryParam.put("APPID", context.getString(R.string.open_weather_map));
         queryParam.put("units", context.getString(R.string.unit_param));
-
-
-        subscription = openWeatherMapService.getWeatherForeCastByCity(place.getName().toString(), queryParam)
+        final String city = cityName;
+        subscription = openWeatherMapService.getWeatherForeCastByCity(city, queryParam)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(weatherApplication.defaultSubscribeScheduler())
                 .subscribe(new Subscriber<OpenWeatherMap>() {
@@ -139,9 +150,10 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
                     @Override
                     public void onError(Throwable e) {
                         Log.d(TAG, "onError() called with: " + "e = [" + e + "]");
-                        if (e != null) {
+                        if (!Util.isNetworkAvailable(context)) {
+                            activityModelCommunicationListener.onCityAddedError(FLAG_INTERNET_NOT_AVAILABLE, null);
+                        } else if (e != null) {
                             activityModelCommunicationListener.onCityAddedError(FLAG_CITY_SOMETHING_WENT_WRONG, e.getMessage());
-
                         } else {
                             activityModelCommunicationListener.onCityAddedError(FLAG_CITY_SOMETHING_WENT_WRONG, null);
 
@@ -159,7 +171,7 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
                             Realm realm = Realm.getDefaultInstance();
                             CityRealm cityRealmTemp = RealmUtil.getCityWithWeather(openWeatherMap);
                             RealmQuery<CityRealm> cityRealms = realm.where(CityRealm.class).contains("name", cityRealmTemp.getName(), Case.SENSITIVE);
-                            if (openWeatherMap.getCity().getName().equalsIgnoreCase(place.getName().toString()) && cityRealms.count() == 0) {
+                            if (openWeatherMap.getCity().getName().equalsIgnoreCase(city) && cityRealms.count() == 0) {
                                 realm.beginTransaction();
                                 CityRealm cityRealm = realm.copyToRealmOrUpdate(cityRealmTemp);
                                 if (sharedPreferenceDataManager != null) {
@@ -172,7 +184,7 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
                             } else {
                                 if (cityRealms.count() > 0) {
                                     activityModelCommunicationListener.onCityAddedError(FLAG_CITY_ALREADY_PRESENT, null);
-                                } else if (!openWeatherMap.getCity().getName().equals(place.getName().toString())) {
+                                } else if (!openWeatherMap.getCity().getName().equals(city)) {
                                     activityModelCommunicationListener.onCityAddedError(FLAG_CITY_NOT_MATCH, null);
                                 }
                             }
@@ -214,7 +226,9 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
                     @Override
                     public void onError(Throwable e) {
                         Log.d(TAG, "onError() called with: " + "e = [" + e + "]");
-                        if (e != null) {
+                        if (!Util.isNetworkAvailable(context)) {
+                            activityModelCommunicationListener.onCityAddedError(FLAG_INTERNET_NOT_AVAILABLE, null);
+                        } else if (e != null) {
                             activityModelCommunicationListener.onCityAddedError(FLAG_CITY_SOMETHING_WENT_WRONG, e.getMessage());
 
                         } else {

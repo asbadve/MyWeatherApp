@@ -4,13 +4,20 @@ import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewCompat;
+import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.animation.Interpolator;
+
+import com.ajinkyabadve.weather.util.Util;
+
 
 /**
  * Created by Ajinkya on 01/07/2016.
  */
-public class ScrollAwareFABBehavior extends FloatingActionButton.Behavior {
+public class ScrollAwareFABBehavior extends CoordinatorLayout.Behavior<FloatingActionButton> {
+    private static final Interpolator INTERPOLATOR = new FastOutSlowInInterpolator();
+
     public ScrollAwareFABBehavior(Context context, AttributeSet attrs) {
         super();
     }
@@ -39,5 +46,8 @@ public class ScrollAwareFABBehavior extends FloatingActionButton.Behavior {
             // User scrolled up and the FAB is currently not visible -> show the FAB
             child.show();
         }
+
     }
+
+
 }
