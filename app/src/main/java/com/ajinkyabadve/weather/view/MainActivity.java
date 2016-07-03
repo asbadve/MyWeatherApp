@@ -48,7 +48,7 @@ import io.realm.RealmList;
 import io.realm.RealmResults;
 
 /**
- * test
+ *
  */
 public class MainActivity extends AppCompatActivity implements RealmChangeListener<RealmResults<CityRealm>>, MainViewModel.OnDialogShow, MainViewModel.onCityAddeByLatLong {
     private static final String TAG = MainActivity.class.getSimpleName();
