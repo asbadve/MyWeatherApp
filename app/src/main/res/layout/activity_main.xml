@@ -66,7 +66,7 @@
             android:layout_margin="@dimen/fab_margin"
             android:onClick="@{viewModel.onFabClick}"
             android:src="@drawable/ic_action_add_city"
-            app:layout_behavior="com.ajinkyabadve.weather.view.behaviour.ScrollAwareFABBehavior" />
-
+             />
+        <!--app:layout_behavior="com.ajinkyabadve.weather.view.behaviour.ScrollAwareFABBehavior"-->
     </android.support.design.widget.CoordinatorLayout>
 </layout>

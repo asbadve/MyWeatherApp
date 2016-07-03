@@ -157,7 +157,7 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
                     // result of the request.
                 }
             } else {
-                getCurrentLatLongAddCity();
+                chekErrorGetCurrentLatLong();
             }
 
 
@@ -259,7 +259,7 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
-                    getCurrentLatLongAddCity();
+                    chekErrorGetCurrentLatLong();
                 } else {
 
                     Snackbar snackbar = Snackbar.make(activityAddCityBinding.coordinateLayout, "Please turn on location permission from setting", Snackbar.LENGTH_LONG);
@@ -275,6 +275,24 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
 
             // other 'case' lines to check for other
             // permissions this app might request
+        }
+    }
+
+    private void chekErrorGetCurrentLatLong() {
+        if (Util.isNetworkAvailable(AddCity.this) && Util.isGpsEnable(AddCity.this)) {
+            getCurrentLatLongAddCity();
+        } else {
+            if (!Util.isGpsEnable(AddCity.this) && !Util.isNetworkAvailable(AddCity.this)) {
+                Snackbar snackbar = Snackbar.make(activityAddCityBinding.coordinateLayout, "Please turn on Gps as well as Internet connection", Snackbar.LENGTH_LONG);
+                snackbar.show();
+            } else if (!Util.isGpsEnable(AddCity.this)) {
+                Snackbar snackbar = Snackbar.make(activityAddCityBinding.coordinateLayout, "Please turn on Gps", Snackbar.LENGTH_LONG);
+                snackbar.show();
+
+            } else if (!Util.isNetworkAvailable(AddCity.this)) {
+                Snackbar snackbar = Snackbar.make(activityAddCityBinding.coordinateLayout, "No connection", Snackbar.LENGTH_LONG);
+                snackbar.show();
+            }
         }
     }
 

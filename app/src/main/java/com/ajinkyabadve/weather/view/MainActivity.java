@@ -212,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
                                 }
                                 return;
                             } else {
-                                getCurrentLatLong();
+                                checkErrorGetLatLong();
                             }
 
 
@@ -249,7 +249,7 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
-                    getCurrentLatLong();
+                    checkErrorGetLatLong();
                 } else {
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
@@ -262,6 +262,24 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
 
             // other 'case' lines to check for other
             // permissions this app might request
+        }
+    }
+
+    private void checkErrorGetLatLong() {
+        if (Util.isNetworkAvailable(MainActivity.this) && Util.isGpsEnable(MainActivity.this)) {
+            getCurrentLatLong();
+        } else {
+            if (!Util.isGpsEnable(MainActivity.this) && !Util.isNetworkAvailable(MainActivity.this)) {
+                Snackbar snackbar = Snackbar.make(activityMainBinding.coordinateLayout, "Please turn on Gps as well as Internet connection", Snackbar.LENGTH_LONG);
+                snackbar.show();
+            } else if (!Util.isGpsEnable(MainActivity.this)) {
+                Snackbar snackbar = Snackbar.make(activityMainBinding.coordinateLayout, "Please turn on Gps", Snackbar.LENGTH_LONG);
+                snackbar.show();
+
+            } else if (!Util.isNetworkAvailable(MainActivity.this)) {
+                Snackbar snackbar = Snackbar.make(activityMainBinding.coordinateLayout, "No connection", Snackbar.LENGTH_LONG);
+                snackbar.show();
+            }
         }
     }
 
