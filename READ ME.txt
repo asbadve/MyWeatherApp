@@ -1,0 +1,7 @@
+-MVVP pattern
+-Databinding used 
+-Realm Database
+-Retrofit used for web service call
+-Rxandroid
+
+
