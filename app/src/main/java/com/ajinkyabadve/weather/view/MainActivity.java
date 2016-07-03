@@ -78,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.AppTheme_NoActionBar);
         super.onCreate(savedInstanceState);
         activityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         mainViewModel = new MainViewModel(MainActivity.this, this, this);
