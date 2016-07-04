@@ -9,8 +9,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.Interpolator;
 
-import com.ajinkyabadve.weather.util.Util;
-
 
 /**
  * Created by Ajinkya on 01/07/2016.

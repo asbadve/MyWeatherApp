@@ -26,28 +26,34 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
 /**
+ * view model class for main activity
  * Created by Ajinkya on 26-06-2016.
  */
 public class MainViewModel extends BaseObservable implements ViewModel {
 
     private static final String TAG = MainViewModel.class.getSimpleName();
     private final Realm realm;
-    private final OnDialogShow onDialogShow;
+    private final OnNavigateToAddCity onNavigateToAddCity;
     private SharedPreferenceDataManager sharedPreferenceDataManager;
     public ObservableInt recyclerViewVisibility;
     public ObservableInt progressBarVisibility;
 
     private Subscription subscription;
     private Context context;
-    private MainViewModel.onCityAddeByLatLong onCityAddeByLatLong;
+    private onCityAddedByLatLong onCityAddedByLatLong;
 
-    public MainViewModel(Context context, OnDialogShow onDialogShow, onCityAddeByLatLong onCityAddeByLatLong) {
-        this.onCityAddeByLatLong = onCityAddeByLatLong;
+    /***
+     * @param context              context
+     * @param onNavigateToAddCity  listener ro the show the
+     * @param onCityAddedByLatLong
+     */
+    public MainViewModel(Context context, OnNavigateToAddCity onNavigateToAddCity, onCityAddedByLatLong onCityAddedByLatLong) {
+        this.onCityAddedByLatLong = onCityAddedByLatLong;
         recyclerViewVisibility = new ObservableInt(View.VISIBLE);
         progressBarVisibility = new ObservableInt(View.INVISIBLE);
         realm = Realm.getDefaultInstance();
         this.context = context;
-        this.onDialogShow = onDialogShow;
+        this.onNavigateToAddCity = onNavigateToAddCity;
         sharedPreferenceDataManager = SharedPreferenceDataManager.getInstance(context);
         checkAnyCityAddedOrNot();
         //loadWeather();
@@ -90,11 +96,11 @@ public class MainViewModel extends BaseObservable implements ViewModel {
                         hideProgressBar();
 
                         if (!Util.isNetworkAvailable(context)) {
-                            onCityAddeByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_INTERNET_NOT_AVAILABLE, null);
+                            onCityAddedByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_INTERNET_NOT_AVAILABLE, null);
                         } else if (e != null) {
-                            onCityAddeByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_CITY_SOMETHING_WENT_WRONG, e.getMessage());
+                            onCityAddedByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_CITY_SOMETHING_WENT_WRONG, e.getMessage());
                         } else {
-                            onCityAddeByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_CITY_SOMETHING_WENT_WRONG, null);
+                            onCityAddedByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_CITY_SOMETHING_WENT_WRONG, null);
 
                         }
 
@@ -125,12 +131,12 @@ public class MainViewModel extends BaseObservable implements ViewModel {
 
                             } else {
                                 if (cityRealms.count() > 0) {
-                                    onCityAddeByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_CITY_ALREADY_PRESENT, null);
+                                    onCityAddedByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_CITY_ALREADY_PRESENT, null);
                                 }
                             }
 
                         } else {
-                            onCityAddeByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_CITY_NOT_FOUND, null);
+                            onCityAddedByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_CITY_NOT_FOUND, null);
 
                         }
 
@@ -171,11 +177,11 @@ public class MainViewModel extends BaseObservable implements ViewModel {
                     public void onError(Throwable e) {
                         Log.d(TAG, "onError() called with: " + "e = [" + e + "]");
                         if (!Util.isNetworkAvailable(context)) {
-                            onCityAddeByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_INTERNET_NOT_AVAILABLE, null);
+                            onCityAddedByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_INTERNET_NOT_AVAILABLE, null);
                         } else if (e != null) {
-                            onCityAddeByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_CITY_SOMETHING_WENT_WRONG, e.getMessage());
+                            onCityAddedByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_CITY_SOMETHING_WENT_WRONG, e.getMessage());
                         } else {
-                            onCityAddeByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_CITY_SOMETHING_WENT_WRONG, null);
+                            onCityAddedByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_CITY_SOMETHING_WENT_WRONG, null);
 
                         }
                         hideProgressBar();
@@ -201,14 +207,14 @@ public class MainViewModel extends BaseObservable implements ViewModel {
 
                             } else {
                                 if (cityRealms.count() > 0) {
-                                    onCityAddeByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_CITY_ALREADY_PRESENT, null);
+                                    onCityAddedByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_CITY_ALREADY_PRESENT, null);
                                 } else if (!openWeatherMap.getCity().getName().equals(city)) {
-                                    onCityAddeByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_CITY_NOT_FOUND, null);
+                                    onCityAddedByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_CITY_NOT_FOUND, null);
                                 }
                             }
 
                         } else {
-                            onCityAddeByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_CITY_NOT_MATCH, null);
+                            onCityAddedByLatLong.onCityAddedError(AddCityActivityViewModel.FLAG_CITY_NOT_MATCH, null);
 
                         }
 
@@ -218,17 +224,26 @@ public class MainViewModel extends BaseObservable implements ViewModel {
 
     }
 
-    public interface OnDialogShow {
-        void onAddCityDialogShow(boolean showDialog);
+    public interface OnNavigateToAddCity {
+        /***
+         * call when click on fab button to add the city
+         *
+         * @param showDialog true:-shows the dialog to add the LatLong when first time app launch
+         *                   o.w just launch the {@link com.ajinkyabadve.weather.view.AddCity}
+         */
+        void onAddCityNavigateToAddCity(boolean showDialog);
 
     }
 
-    public interface onCityAddeByLatLong {
-        void onCityAddedByLatLong();
-
-        //@AddCityErrorFlag
+    /**
+     * call back after adding the city by latlong
+     */
+    public interface onCityAddedByLatLong {
+        /**
+         * @param errorFlag error flag code
+         * @param message   any message if needed
+         */
         void onCityAddedError(@AddCityActivityViewModel.AddCityErrorFlag int errorFlag, String message);
-
 
     }
 
@@ -239,14 +254,14 @@ public class MainViewModel extends BaseObservable implements ViewModel {
     private void checkAnyCityAddedOrNot() {
         long cityCount = realm.where(CityRealm.class).count();
         if (cityCount == 0) {
-            if (onDialogShow != null) {
+            if (onNavigateToAddCity != null) {
                 int firstLunch = sharedPreferenceDataManager.getSavedIntPreference(SharedPreferenceDataManager.FIREST_LAUCH);
 
                 if (firstLunch == 1) {
-                    onDialogShow.onAddCityDialogShow(true);
+                    onNavigateToAddCity.onAddCityNavigateToAddCity(true);
 
                 } else {
-                    onDialogShow.onAddCityDialogShow(false);
+                    onNavigateToAddCity.onAddCityNavigateToAddCity(false);
 
                 }
             }
@@ -254,9 +269,14 @@ public class MainViewModel extends BaseObservable implements ViewModel {
 
     }
 
+    /**
+     * onClick listener for fab
+     *
+     * @param view
+     */
     public void onFabClick(View view) {
-        if (onDialogShow != null) {
-            onDialogShow.onAddCityDialogShow(false);
+        if (onNavigateToAddCity != null) {
+            onNavigateToAddCity.onAddCityNavigateToAddCity(false);
         }
     }
 

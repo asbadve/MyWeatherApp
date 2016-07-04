@@ -5,8 +5,6 @@ import android.content.res.TypedArray;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.text.format.DateFormat;
-import android.util.Log;
 
 import com.ajinkyabadve.weather.R;
 
@@ -14,7 +12,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
 
 /**
  * Created by Ajinkya on 29-06-2016.
@@ -22,38 +19,6 @@ import java.util.TimeZone;
 public class Util {
     public static final String DATE_FORMAT = "yyyyMMdd";
 
-
-    /**
-     * Convert date in dd/mm/yy
-     *
-     * @param dateInMiliSeconds
-     * @return
-     */
-    public static String getDateFormatByString(long dateInMiliSeconds) {
-
-        Calendar cal = Calendar.getInstance();
-        TimeZone tz = cal.getTimeZone();
-
-        /* debug: is it local time? */
-        Log.d("Time zone: ", tz.getDisplayName());
-
-        /* date formatter in local timezone */
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        sdf.setTimeZone(tz);
-
-        /* print your timestamp and double check it's the date you expect */
-        long timestamp = dateInMiliSeconds;
-        String localTime = sdf.format(new Date(timestamp * 1000)); // I assume your timestamp is in seconds and you're converting to milliseconds?
-        Log.d("Time: ", localTime);
-        Date date = null;
-        try {
-            date = sdf.parse(localTime);
-            Log.d("Date format ", localTime);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return DateFormat.format("dd", date) + " " + DateFormat.format("EEEE", date);
-    }
 
     /**
      * Converts Date class to a string representation, used for easy comparison and database lookup.
@@ -68,6 +33,12 @@ public class Util {
         return sdf.format(date);
     }
 
+    /**
+     * convert unix timestamp to the formatted date in int to store in database
+     *
+     * @param date
+     * @return
+     */
     public static Integer getDbDateLong(Date date) {
         // Because the API returns a unix timestamp (measured in seconds),
         // it must be converted to milliseconds in order to be converted to valid date.
@@ -123,7 +94,6 @@ public class Util {
             } else {
 
                 return new SimpleDateFormat("EEEE").format(calendarForInputDate.getTime());
-
 //                Date inputDate = dbDateFormat.parse(dateStr);
 //                SimpleDateFormat monthDayFormat = new SimpleDateFormat("MMMM dd yyyy");
 //                String monthDayString = monthDayFormat.format(inputDate);
@@ -137,6 +107,13 @@ public class Util {
 
     }
 
+    /**
+     * return the forenamed temperature
+     *
+     * @param context     context
+     * @param temperature temp
+     * @return forenamed temp
+     */
     public static String formatTemperature(Context context, double temperature) {
         double temp;
         boolean isMetric = false;
@@ -223,12 +200,20 @@ public class Util {
         return -1;
     }
 
+    /**
+     * @param context context
+     * @return true:- gps is enable o.w false
+     */
     public static boolean isGpsEnable(Context context) {
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
     }
 
+    /**
+     * @param context
+     * @return true:- network is available o.w false
+     */
     public static boolean isNetworkAvailable(Context context) {
 
         ConnectivityManager cm = (ConnectivityManager) context
@@ -241,6 +226,11 @@ public class Util {
             return true;
 
     }
+
+    /**
+     * @param context context
+     * @return current toolbar height
+     */
     public static int getToolbarHeight(Context context) {
         final TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(
                 new int[]{R.attr.actionBarSize});

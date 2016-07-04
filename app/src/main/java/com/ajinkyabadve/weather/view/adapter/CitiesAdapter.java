@@ -8,34 +8,69 @@ import android.view.ViewGroup;
 import com.ajinkyabadve.weather.R;
 import com.ajinkyabadve.weather.databinding.ItemCityBinding;
 import com.ajinkyabadve.weather.model.realm.CityRealm;
-import com.ajinkyabadve.weather.util.SharedPreferenceDataManager;
 import com.ajinkyabadve.weather.viewmodel.ItemCityViewModel;
 
 import io.realm.RealmResults;
 
 /**
+ * Recycler adapter or cities
  * Created by Ajinkya on 29/06/2016.
  */
 public class CitiesAdapter extends RecyclerView.Adapter<CitiesAdapter.CitiesViewHolder> {
     RealmResults<CityRealm> cityRealms;
     private OnCityOperation onCityOperation;
 
+    /***
+     * onclick listener
+     */
     public interface OnItemClick {
+        /**
+         * call when city get selected
+         *
+         * @param cityRealm selected city object
+         */
         void OnCitySelected(CityRealm cityRealm);
+
+        /**
+         * call when city get deleted
+         *
+         * @param cityRealm deleted city object
+         */
         void OnCityDeletedFromAdapter(CityRealm cityRealm);
 
     }
 
+    /**
+     * listener for the interaction of adapter and its view model
+     */
     public interface OnCityOperation {
+        /***
+         * call when city get selected
+         *
+         * @param cityRealm selected city
+         */
         void OnCitySelectedFromAdapter(CityRealm cityRealm);
 
+        /**
+         * call when city get deleted
+         *
+         * @param cityRealm
+         */
         void OnCityDeleted(CityRealm cityRealm);
     }
 
+    /**
+     * @param OnCityOperation
+     */
     public CitiesAdapter(OnCityOperation OnCityOperation) {
         this.onCityOperation = OnCityOperation;
     }
 
+    /***
+     * set realm result list to adapter
+     *
+     * @param cityRealms RealmResult objects of cities
+     */
     public void setCityRealms(RealmResults<CityRealm> cityRealms) {
         this.cityRealms = cityRealms;
         notifyDataSetChanged();
@@ -67,11 +102,21 @@ public class CitiesAdapter extends RecyclerView.Adapter<CitiesAdapter.CitiesView
         final ItemCityBinding itemCityBinding;
         private OnCityOperation onCityOperation;
 
+        /**
+         * @param itemCityBinding
+         * @param onCityOperation
+         */
         public CitiesViewHolder(ItemCityBinding itemCityBinding, OnCityOperation onCityOperation) {
             super(itemCityBinding.rootView);
             this.itemCityBinding = itemCityBinding;
             this.onCityOperation = onCityOperation;
         }
+
+        /**
+         * bind the view model and data
+         *
+         * @param cityRealm city object to be bind
+         */
 
         void bindCity(CityRealm cityRealm) {
             if (itemCityBinding.getViewModel() == null) {
@@ -92,15 +137,4 @@ public class CitiesAdapter extends RecyclerView.Adapter<CitiesAdapter.CitiesView
         }
     }
 
-    private RealmResults<CityRealm> setDefaultCity(RealmResults<CityRealm> cityRealms, SharedPreferenceDataManager preferenceDataManager) {
-        int cityIdPreference = preferenceDataManager.getSavedDefaultCityIdPreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID);
-        for (int i = 0; i < cityRealms.size(); i++) {
-            if (cityRealms.get(i).getId() == cityIdPreference) {
-                cityRealms.get(i).setDefault(true);
-            } else {
-                cityRealms.get(i).setDefault(false);
-            }
-        }
-        return cityRealms;
-    }
 }
