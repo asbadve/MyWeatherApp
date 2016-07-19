@@ -93,6 +93,7 @@ public class WeatherExactJob extends Job {
         } else if (result == Result.SUCCESS) {
             int jobId = new JobRequest.Builder(WeatherPeriodWiseJob.TAG)
                     .setPeriodic(60_000L)
+                    .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
                     .setPersisted(true)
                     .build()
                     .schedule();
