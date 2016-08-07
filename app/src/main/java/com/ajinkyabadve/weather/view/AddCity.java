@@ -110,6 +110,7 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
                         .build();
                 Intent intent =
                         new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
+//                                .zzkv("Pune")//for test only
                                 .setFilter(typeFilter)
                                 .build(AddCity.this);
 

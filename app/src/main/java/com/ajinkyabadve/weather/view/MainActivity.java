@@ -230,7 +230,6 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
             alertDialog.show();
         } else {
             startActivity(new Intent(MainActivity.this, AddCity.class));
-
         }
 
 
