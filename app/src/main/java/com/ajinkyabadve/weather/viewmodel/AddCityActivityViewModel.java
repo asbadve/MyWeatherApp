@@ -15,7 +15,6 @@ import com.ajinkyabadve.weather.model.realm.CityRealm;
 import com.ajinkyabadve.weather.model.realm.RealmUtil;
 import com.ajinkyabadve.weather.util.SharedPreferenceDataManager;
 import com.ajinkyabadve.weather.util.Util;
-import com.google.android.gms.location.places.Place;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -32,6 +31,7 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
 /**
+ * View model class fot the AddCity activity
  * Created by Ajinkya on 29/06/2016.
  */
 public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<RealmResults<CityRealm>> {
@@ -44,11 +44,17 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
     private RealmResults<CityRealm> cityRealms;
     public ObservableInt recyclerVisibility;
 
+    /**
+     * show progress bar and hides the recycler view
+     */
     public void showProgressBar() {
         recyclerVisibility.set(View.INVISIBLE);
         progressVisibility.set(View.VISIBLE);
     }
 
+    /**
+     * hide the progress bar and shows the recycler view
+     */
     public void hideProgressBar() {
         progressVisibility.set(View.INVISIBLE);
         recyclerVisibility.set(View.VISIBLE);
@@ -57,37 +63,24 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({FLAG_CITY_ALREADY_PRESENT, FLAG_CITY_WEATHER_NOT_AVAILABLE, FLAG_CITY_SOMETHING_WENT_WRONG, FLAG_CITY_NOT_FOUND, FLAG_CITY_NOT_MATCH, FLAG_INTERNET_NOT_AVAILABLE})
+    /***
+     *Error code for the add city
+     */
     public @interface AddCityErrorFlag {
 
     }
 
     public static final int FLAG_CITY_ALREADY_PRESENT = 1;
-
     public static final int FLAG_CITY_WEATHER_NOT_AVAILABLE = 2;
-
     public static final int FLAG_CITY_SOMETHING_WENT_WRONG = 3;
-
     public static final int FLAG_CITY_NOT_FOUND = 4;
     public static final int FLAG_CITY_NOT_MATCH = 5;
     public static final int FLAG_INTERNET_NOT_AVAILABLE = 6;
 
-
-    @Override
-    public void onChange(RealmResults<CityRealm> element) {
-        if (activityModelCommunicationListener != null) {
-            cityRealms = element;
-            activityModelCommunicationListener.onCityAdded(cityRealms, sharedPreferenceDataManager);
-
-        }
-    }
-
-    public interface ActivityModelCommunicationListener {
-        void onCityAddedError(@AddCityErrorFlag int errorFlag, @Nullable String message);
-
-        void onCityAdded(RealmResults<CityRealm> cityRealms, SharedPreferenceDataManager sharedPreferenceDataManager);
-
-    }
-
+    /***
+     * @param context                            context
+     * @param activityModelCommunicationListener {@link ActivityModelCommunicationListener}
+     */
     public AddCityActivityViewModel(Context context, ActivityModelCommunicationListener activityModelCommunicationListener) {
         this.context = context;
         recyclerVisibility = new ObservableInt(View.VISIBLE);
@@ -96,9 +89,34 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
         sharedPreferenceDataManager = SharedPreferenceDataManager.getInstance(context);
     }
 
+
+    /**
+     * listener to communicate with the activity
+     */
+    public interface ActivityModelCommunicationListener {
+        /**
+         * called when their is an error regarding the add city
+         *
+         * @param errorFlag
+         * @param message
+         */
+        void onCityAddedError(@AddCityErrorFlag int errorFlag, @Nullable String message);
+
+        /***
+         * called when city get added successfully
+         *
+         * @param cityRealms
+         * @param sharedPreferenceDataManager
+         */
+        void onCityAdded(RealmResults<CityRealm> cityRealms, SharedPreferenceDataManager sharedPreferenceDataManager);
+
+    }
+
+
     @Override
     public void onDestroy() {
-
+        this.activityModelCommunicationListener = null;
+        this.activityModelCommunicationListener = null;
     }
 
 
@@ -120,8 +138,9 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
 
     /**
      * Validate the place form autocomplete api
+     * and forecast for the city
      *
-     * @param cityName
+     * @param cityName city name for which the weather can be fetch
      */
     public void checkIfPlaceIsValid(String cityName) {
         recyclerVisibility.set(View.INVISIBLE);
@@ -143,8 +162,6 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
                         Log.d(TAG, "onCompleted() called with: " + "");
                         progressVisibility.set(View.INVISIBLE);
                         recyclerVisibility.set(View.VISIBLE);
-
-
                     }
 
                     @Override
@@ -200,6 +217,12 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
 
     }
 
+    /***
+     * add weather for city by using latlong
+     *
+     * @param latitude
+     * @param longitude
+     */
 
     public void addCityByLatLong(double latitude, double longitude) {
         if (subscription != null && !subscription.isUnsubscribed()) subscription.unsubscribe();
@@ -277,5 +300,14 @@ public class AddCityActivityViewModel implements ViewModel, RealmChangeListener<
                     }
                 });
 
+    }
+
+    @Override
+    public void onChange(RealmResults<CityRealm> element) {
+        if (activityModelCommunicationListener != null) {
+            cityRealms = element;
+            activityModelCommunicationListener.onCityAdded(cityRealms, sharedPreferenceDataManager);
+
+        }
     }
 }

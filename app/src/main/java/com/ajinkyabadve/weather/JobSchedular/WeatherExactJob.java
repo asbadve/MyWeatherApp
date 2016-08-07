@@ -25,6 +25,7 @@ import rx.Subscription;
 import rx.functions.Func1;
 
 /**
+ * Jobscedular for the exact job on first launch
  * Created by Ajinkya on 27/06/2016.
  */
 public class WeatherExactJob extends Job {
@@ -45,7 +46,7 @@ public class WeatherExactJob extends Job {
         final Map<String, String> queryParam = new HashMap<>();
         queryParam.put("cnt", getContext().getString(R.string.cnt_parameter_for_days));
         queryParam.put("APPID", getContext().getString(R.string.open_weather_map));
-        queryParam.put("units",getContext().getString(R.string.unit_param));
+        queryParam.put("units", getContext().getString(R.string.unit_param));
 
         Realm realm = Realm.getDefaultInstance();
         List<String> cities = new ArrayList<>();
@@ -92,6 +93,7 @@ public class WeatherExactJob extends Job {
         } else if (result == Result.SUCCESS) {
             int jobId = new JobRequest.Builder(WeatherPeriodWiseJob.TAG)
                     .setPeriodic(60_000L)
+                    .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
                     .setPersisted(true)
                     .build()
                     .schedule();

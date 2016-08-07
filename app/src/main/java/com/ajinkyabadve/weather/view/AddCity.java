@@ -19,7 +19,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.ajinkyabadve.weather.R;
 import com.ajinkyabadve.weather.databinding.ActivityAddCityBinding;
@@ -46,6 +45,9 @@ import java.util.Locale;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
+/****
+ * this activity is for adding multiple city and current location
+ */
 public class AddCity extends AppCompatActivity implements AddCityActivityViewModel.ActivityModelCommunicationListener, CitiesAdapter.OnCityOperation {
     private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 2;
     AddCityActivityViewModel addCityActivityViewModel;
@@ -69,6 +71,11 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
         client.connect();
     }
 
+    /***
+     * set up recycler adapterView
+     *
+     * @param recyclerView
+     */
     private void setUpRecyclerView(RecyclerView recyclerView) {
         CitiesAdapter citiesAdapter = new CitiesAdapter(this);
         recyclerView.setAdapter(citiesAdapter);
@@ -168,6 +175,9 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * get current lat long and its weather
+     */
     @SuppressWarnings({"MissingPermission"})
     private void getCurrentLatLongAddCity() {
         addCityActivityViewModel.showProgressBar();
@@ -224,6 +234,9 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
                         if (!Util.isGpsEnable(AddCity.this)) {
                             Snackbar snackbar = Snackbar.make(activityAddCityBinding.coordinateLayout, "Please turn on the gps", Snackbar.LENGTH_LONG);
                             snackbar.show();
+                        } else {
+                            Snackbar snackbar = Snackbar.make(activityAddCityBinding.coordinateLayout, "Something went wrong", Snackbar.LENGTH_LONG);
+                            snackbar.show();
                         }
 
 
@@ -279,6 +292,10 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
         }
     }
 
+    /**
+     * check the GPS error and other error if any present
+     * and then get the current location and its weather
+     */
     private void chekErrorGetCurrentLatLong() {
         if (Util.isNetworkAvailable(AddCity.this) && Util.isGpsEnable(AddCity.this)) {
             getCurrentLatLongAddCity();
@@ -300,12 +317,20 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
     @Override
     public void onCityAddedError(int errorFlag, String message) {
         String errorMesg = "";
-        errorMesg = getString(errorFlag, message, errorMesg);
+        errorMesg = getErrorString(errorFlag, message, errorMesg);
         Snackbar snackbar = Snackbar.make(activityAddCityBinding.coordinateLayout, errorMesg, Snackbar.LENGTH_LONG);
         snackbar.show();
     }
 
-    private String getString(int errorFlag, String message, String errorMesg) {
+    /***
+     * get the error string corresponding to the error code
+     *
+     * @param errorFlag
+     * @param message
+     * @param errorMesg
+     * @return
+     */
+    private String getErrorString(int errorFlag, String message, String errorMesg) {
         switch (errorFlag) {
             case AddCityActivityViewModel.FLAG_CITY_ALREADY_PRESENT:
                 errorMesg = "This city is already added";
@@ -376,16 +401,6 @@ public class AddCity extends AppCompatActivity implements AddCityActivityViewMod
                 .create();
         alertDialog.show();
 
-
     }
 
-    public void showProgressBar() {
-        activityAddCityBinding.cities.setVisibility(View.INVISIBLE);
-        activityAddCityBinding.progressBar.setVisibility(View.VISIBLE);
-    }
-
-    public void hideProgressBar() {
-        activityAddCityBinding.cities.setVisibility(View.VISIBLE);
-        activityAddCityBinding.progressBar.setVisibility(View.INVISIBLE);
-    }
 }

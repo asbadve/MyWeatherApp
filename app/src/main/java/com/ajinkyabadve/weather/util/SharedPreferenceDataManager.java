@@ -7,8 +7,6 @@ import android.preference.PreferenceManager;
 
 /***
  * class to save and retrieve data in the preferences
- *
- * @author spoton
  */
 public class SharedPreferenceDataManager {
     private static final String TAG = SharedPreferenceDataManager.class.getSimpleName();

@@ -6,6 +6,7 @@ import com.evernote.android.job.Job;
 import com.evernote.android.job.JobCreator;
 
 /**
+ * this class crete the jobs for weather application
  * Created by Ajinkya on 27/06/2016.
  */
 public class WeatherJobCreator implements JobCreator {

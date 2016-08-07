@@ -8,9 +8,8 @@ import com.ajinkyabadve.weather.model.realm.CityRealm;
 import com.ajinkyabadve.weather.util.SharedPreferenceDataManager;
 import com.ajinkyabadve.weather.view.adapter.CitiesAdapter;
 
-import io.realm.Realm;
-
 /**
+ * View model for {@link CitiesAdapter}
  * Created by Ajinkya on 29/06/2016.
  */
 public class ItemCityViewModel extends BaseObservable implements ViewModel {
@@ -20,6 +19,11 @@ public class ItemCityViewModel extends BaseObservable implements ViewModel {
     private CitiesAdapter.OnItemClick onItemClick;
     private int defaultId;
 
+    /***
+     * @param context
+     * @param cityRealm
+     * @param onItemClick
+     */
     public ItemCityViewModel(Context context, CityRealm cityRealm, CitiesAdapter.OnItemClick onItemClick) {
         this.cityRealm = cityRealm;
         this.context = context;
@@ -29,50 +33,49 @@ public class ItemCityViewModel extends BaseObservable implements ViewModel {
 
     }
 
+    /**
+     * @return city name
+     */
     public String getCityName() {
         return cityRealm.getName();
     }
 
-    public boolean getIsDefault() {
-        return cityRealm.isDefault();
-    }
 
-
-    // Allows recycling ItemRepoViewModels within the recyclerview adapter
+    /***
+     * Allows recycling ItemCityViewModel within the recyclerView adapter
+     *
+     * @param cityRealm
+     */
     public void setCityRealm(CityRealm cityRealm) {
         this.cityRealm = cityRealm;
         notifyChange();
     }
 
+    /**
+     * we save the default city id in the shared preference
+     *
+     * @param view
+     */
     public void onItemClick(View view) {
         onItemClick.OnCitySelected(cityRealm);
         sharedPreferenceDataManager.savePreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID, cityRealm.getId());
-//        Realm realm = Realm.getDefaultInstance();
-//        realm.beginTransaction();
-//        cityRealm.setDefault(true);
-//        realm.commitTransaction();
-//
-//        realm.beginTransaction();
-//        RealmResults<CityRealm> cityRealms = realm.where(CityRealm.class).notEqualTo("id", cityRealm.getId()).not().findAll();
-//        for (int i = 0; i < cityRealms.size(); i++) {
-//            cityRealms.get(i).setDefault(false);
-//        }
-//        realm.commitTransaction();
-
     }
 
+    /**
+     * after delete the city notifies the adapter
+     *
+     * @param view
+     */
     public void onItemDeleteClick(View view) {
-//        Realm realm = Realm.getDefaultInstance();
-//        realm.beginTransaction();
-//        cityRealm.deleteFromRealm();
-//        realm.commitTransaction();
         onItemClick.OnCityDeletedFromAdapter(cityRealm);
         defaultId = sharedPreferenceDataManager.getSavedDefaultCityIdPreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID);
-//        notifyAll();
-
-//
     }
 
+    /***
+     * return weather the city is default or not
+     *
+     * @return
+     */
     public boolean isDefaultCity() {
         defaultId = sharedPreferenceDataManager.getSavedDefaultCityIdPreference(SharedPreferenceDataManager.SF_KEY_DEFAULT_CITY_ID);
         return (defaultId == cityRealm.getId());

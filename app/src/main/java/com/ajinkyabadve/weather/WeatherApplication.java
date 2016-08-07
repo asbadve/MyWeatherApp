@@ -19,6 +19,7 @@ import rx.Scheduler;
 import rx.schedulers.Schedulers;
 
 /**
+ * Application class for the Weather application
  * Created by Ajinkya on 26-06-2016.
  */
 public class WeatherApplication extends Application {

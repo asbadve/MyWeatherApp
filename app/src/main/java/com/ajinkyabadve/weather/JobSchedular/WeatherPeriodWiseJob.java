@@ -26,6 +26,7 @@ import rx.Subscription;
 import rx.functions.Func1;
 
 /**
+ * class produces the periodic job to fetch the weather forecast
  * Created by Ajinkya on 27/06/2016.
  */
 public class WeatherPeriodWiseJob extends Job {

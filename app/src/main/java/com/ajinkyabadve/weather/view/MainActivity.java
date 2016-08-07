@@ -48,9 +48,9 @@ import io.realm.RealmList;
 import io.realm.RealmResults;
 
 /**
- *
+ * This activity shows the weather forecast for 14 days for city
  */
-public class MainActivity extends AppCompatActivity implements RealmChangeListener<RealmResults<CityRealm>>, MainViewModel.OnDialogShow, MainViewModel.onCityAddeByLatLong {
+public class MainActivity extends AppCompatActivity implements RealmChangeListener<RealmResults<CityRealm>>, MainViewModel.OnNavigateToAddCity, MainViewModel.onCityAddedByLatLong {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 2;
@@ -95,6 +95,11 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
 
     }
 
+    /**
+     * set up recycler view
+     *
+     * @param recyclerView
+     */
     private void setWeatherRecyclerView(RecyclerView recyclerView) {
         ListAdapter listAdapter = new ListAdapter();
         recyclerView.addItemDecoration(new SimpleDividerItemDecoration(MainActivity.this));
@@ -146,11 +151,6 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
 
                 String startDate = Util.getDbDateString(new Date());
                 String endDate = Util.getDbDateStringAfter14Days(new Date());
-//                long fromUnix = System.currentTimeMillis() / 1000L;
-//                Calendar c = Calendar.getInstance();
-//                c.setTimeInMillis(fromUnix);
-//                c.add(Calendar.DATE, 14);
-//                long toUnix = c.getTimeInMillis();
                 RealmResults<ListRealm> listRealmRealmResults = cityRealm.getListRealm().where().between("dt", Integer.parseInt(startDate), Integer.parseInt(endDate)).findAll();
                 RealmList<ListRealm> listRealm = new RealmList<ListRealm>();
                 listRealm.addAll(listRealmRealmResults.subList(0, listRealmRealmResults.size()));
@@ -168,12 +168,11 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
                 listAdapter.setList(null);
                 listAdapter.notifyDataSetChanged();
             }
-
         }
     }
 
     @Override
-    public void onAddCityDialogShow(boolean showDialog) {
+    public void onAddCityNavigateToAddCity(boolean showDialog) {
         if (showDialog) {
             AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this)
                     .setMessage(MainActivity.this.getResources().getString(R.string.add_city_manualy_current_location))
@@ -231,11 +230,6 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
         } else {
             startActivity(new Intent(MainActivity.this, AddCity.class));
         }
-
-
-//        FragmentManager fm = getSupportFragmentManager();
-//        AddCityDialogFragment addCityDialogFragment = AddCityDialogFragment.newInstance("Some Title");
-//        addCityDialogFragment.show(fm, "fragment_edit_name");
     }
 
 
@@ -251,7 +245,7 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
                     // contacts-related task you need to do.
                     checkErrorGetLatLong();
                 } else {
-                    // permission denied, boo! Disable the
+                    // permission denied, boo! Disable the // TODO: 04/07/2016 if needed use this
                     // functionality that depends on this permission.
 //                    if (sharedPreferenceDataManager != null) {
 //                        sharedPreferenceDataManager.savePreference(SharedPreferenceDataManager.SF_KEY_PERMISSION_FINE_LOCATION, false);
@@ -265,6 +259,9 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
         }
     }
 
+    /***
+     * validate the LatLong add the city weather forecast
+     */
     private void checkErrorGetLatLong() {
         if (Util.isNetworkAvailable(MainActivity.this) && Util.isGpsEnable(MainActivity.this)) {
             getCurrentLatLong();
@@ -284,6 +281,9 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
     }
 
     @SuppressWarnings({"MissingPermission"})
+    /***
+     * get current current latlong by using the awareness api and add the current weather forecast for the city
+     */
     private void getCurrentLatLong() {
         mainViewModel.showProgressBar();
         Awareness.SnapshotApi.getLocation(client)
@@ -346,11 +346,6 @@ public class MainActivity extends AppCompatActivity implements RealmChangeListen
 
                     }
                 });
-    }
-
-    @Override
-    public void onCityAddedByLatLong() {
-
     }
 
     @Override

@@ -11,15 +11,17 @@ import com.ajinkyabadve.weather.R;
 
 
 /**
+ * simple decorator class to create the divider for the recycler view
  * Created by Ajinkya on 2/18/2016.
  */
 public class SimpleDividerItemDecoration extends RecyclerView.ItemDecoration {
     private Drawable mDivider;
 
+    /***
+     * @param context context
+     */
     public SimpleDividerItemDecoration(Context context) {
-
         mDivider = ContextCompat.getDrawable(context, R.drawable.line_divider);
-//        mDivider = context.getResources().getDrawable(R.drawable.line_divider);
     }
 
     @Override

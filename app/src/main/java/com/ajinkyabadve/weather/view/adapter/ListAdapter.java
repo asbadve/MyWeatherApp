@@ -14,6 +14,7 @@ import com.ajinkyabadve.weather.viewmodel.ItemListViewModel;
 import io.realm.RealmList;
 
 /**
+ * adapter for the list forecast
  * Created by Ajinkya on 29/06/2016.
  */
 public class ListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -52,7 +53,7 @@ public class ListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if (holder.getItemViewType()==VIEW_TYPE_TODAY) {
+        if (holder.getItemViewType() == VIEW_TYPE_TODAY) {
             TodayItemListViewHolder itemListViewHolder = (TodayItemListViewHolder) holder;
             itemListViewHolder.bindList(list.get(position));
         } else {
@@ -70,21 +71,36 @@ public class ListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return list.size();
     }
 
+    /**
+     * @param list realmList for the {@link ListRealm} model
+     */
+
     public void setList(RealmList<ListRealm> list) {
         this.list = list;
     }
 
+    /***
+     * View holder class for the list items
+     */
     public static class ItemListViewHolder extends RecyclerView.ViewHolder {
 
 
         private final ListItemBinding listItemBinding;
 
+        /***
+         * @param listItemBinding
+         */
         public ItemListViewHolder(ListItemBinding listItemBinding) {
             super(listItemBinding.rootView);
             this.listItemBinding = listItemBinding;
         }
 
 
+        /**
+         * bind the data to the view model
+         *
+         * @param listRealm {@link ListRealm} object
+         */
         void bindList(ListRealm listRealm) {
             if (listItemBinding.getViewModel() == null) {
                 listItemBinding.setViewModel(new ItemListViewModel(itemView.getContext(), listRealm));
@@ -94,16 +110,25 @@ public class ListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
-
+    /**
+     * View holder class for the today's weather forecast
+     */
     public static class TodayItemListViewHolder extends RecyclerView.ViewHolder {
         private final ListItemTodayBinding listItemBinding;
 
+        /**
+         * @param listItemBinding
+         */
         public TodayItemListViewHolder(ListItemTodayBinding listItemBinding) {
             super(listItemBinding.rootView);
             this.listItemBinding = listItemBinding;
         }
 
-
+        /**
+         * bind the data to the view model
+         *
+         * @param listRealm {@link ListRealm} object
+         */
         void bindList(ListRealm listRealm) {
             if (listItemBinding.getViewModel() == null) {
                 listItemBinding.setViewModel(new ItemListViewModel(itemView.getContext(), listRealm));
